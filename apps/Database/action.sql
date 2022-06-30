@@ -1,0 +1,5 @@
+
+CREATE TABLE IF NOT EXISTS `action` (
+  `id` int(11) AUTO_INCREMENT PRIMARY KEY,
+  `name` varchar(50)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;

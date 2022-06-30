@@ -1,0 +1,199 @@
+<?php
+use NG\Uri;
+$baseUrl = Uri::baseUrl();
+$config = $this->config;
+$helper = $this->helper;
+$viewAlert = isset($this->viewAlert) ? $this->viewAlert : "";
+$viewSuccess = isset($this->viewSuccess) ? $this->viewSuccess : "";
+$viewDataUserType = isset($this->viewDataUserType) ? $this->viewDataUserType : array();
+?>
+
+<div class="modal modal-danger fade" id="dialog-delete">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <form role="form" id="form-delete" method="post">
+            <div class="modal-content">
+                <div class="modal-header bg-danger">
+                    <h4 class="modal-title text-light">Hapus Data</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
+                        <span aria-hidden="true" class="text-white">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="modal-error-body">
+                    <input type="hidden" id="del-user-id" name="del-user-id" data-field="id">
+                    Yakin ingin menghapus data?
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="submit" name="action" class="btn btn-danger" value="delete">Ya</button>
+                    <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="dialog-add" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content">
+            <form role="form" id="form-add" method="post" enctype="multipart/form-data">
+                <div class="modal-header bg-success">
+                    <h4 class="modal-title text-light">Tambah Data</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="add-type" class="col-form-label">Jenis Pengguna</label>
+                                <select class="form-control select2bs4" id="add-type" name="add-type" data-type="select">
+                                    <?php
+                                    if ($viewDataUserType){
+                                        $dataUserType = $viewDataUserType["data"];
+                                        foreach ($dataUserType as $itemType){
+                                            $idType = $itemType["id"];
+                                            $nameType = $itemType["name"];
+                                            ?>
+                                            <option value="<?php echo $idType ?>"><?php echo "$nameType" ?></option>
+                                            <?php
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="add-name" class="col-form-label">Nama Lengkap</label>
+                                <input type="text" class="form-control" id="add-name" name="add-name" placeholder="Nama Lengkap">
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="add-email" class="col-form-label">Email</label>
+                                <input type="email" class="form-control" id="add-email" name="add-email" placeholder="Email">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="add-password" class="col-form-label">Kata Sandi</label>
+                                <input type="password" class="form-control" id="add-password" name="add-password" placeholder="Kata Sandi">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="add-confirm" class="col-form-label">Konfirmasi Kata Sandi</label>
+                                <input type="password" class="form-control" id="add-confirm" name="add-confirm" placeholder="Konfirmasi Kata Sandi">
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="add-image" class="col-form-label">Foto Diri</label>
+                                <div class="list-group-item text-center">
+                                    <img style="max-height: 100px; max-width: 100px" id="user-add-image"
+                                         class="img-fluid" src="<?php echo $baseUrl ?>assets/img/image.png" alt="">
+                                    <input accept=".jpg,.jpeg,.png" type="file" id="add-image" name="add-image" style="display:none"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" name="action" class="btn btn-success" value="add">
+                        <i class="fas fa-save"></i>&nbsp;&nbsp;Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="dialog-edit" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content">
+            <form role="form" id="form-edit" method="post" enctype="multipart/form-data">
+                <div class="modal-header bg-warning">
+                    <h4 class="modal-title text-dark">Ubah Data</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="edit-type" class="col-form-label">Jenis Pengguna</label>
+                                <select class="form-control select2bs4" id="edit-type" name="edit-type" data-type="select" data-field="idtype">
+                                    <?php
+                                    if ($viewDataUserType){
+                                        $dataUserType = $viewDataUserType["data"];
+                                        foreach ($dataUserType as $itemType){
+                                            $idType = $itemType["id"];
+                                            $nameType = $itemType["name"];
+                                            ?>
+                                            <option value="<?php echo $idType ?>"><?php echo "$nameType" ?></option>
+                                            <?php
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="edit-active" class="col-form-label">Status Pengguna</label>
+                                <select class="form-control select2bs4" id="edit-active" name="edit-active" data-type="select" data-field="active">
+                                    <option value="0">Tidak Aktif</option>
+                                    <option value="1">Aktif</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="edit-name" class="col-form-label">Nama Lengkap</label>
+                                <input type="hidden" class="form-control" id="edit-id" name="edit-id" data-field="id">
+                                <input type="hidden" class="form-control" id="edit-code" name="edit-code" data-field="code">
+                                <input type="text" class="form-control" id="edit-name" name="edit-name" placeholder="Nama Lengkap" data-field="name">
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="edit-email" class="col-form-label">Email</label>
+                                <input type="email" class="form-control" id="edit-email" name="edit-email" placeholder="Email" data-field="email">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="edit-password" class="col-form-label">Kata Sandi</label>
+                                <input type="password" class="form-control" id="edit-password" name="edit-password" placeholder="Kata Sandi">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="edit-confirm" class="col-form-label">Konfirmasi Kata Sandi</label>
+                                <input type="password" class="form-control" id="edit-confirm" name="edit-confirm" placeholder="Konfirmasi Kata Sandi">
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="edit-image" class="col-form-label">Foto Diri</label>
+                                <div class="list-group-item text-center">
+                                    <img style="max-height: 100px; max-width: 100px" id="user-edit-image"
+                                         class="img-fluid" src="<?php echo $baseUrl ?>assets/img/image.png" data-field="image-path">
+                                    <input accept=".jpg,.jpeg,.png" type="file" id="edit-image" name="edit-image" style="display:none"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" name="action" class="btn btn-warning" value="edit">
+                        <i class="fas fa-save"></i>&nbsp;&nbsp;Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,180 @@
+<?php
+
+use NG\Registry;
+use NG\Uri;
+$helper = $this->helper;
+$baseUrl = Uri::baseUrl();
+$config = Registry::get('config');
+$controllerPath = Registry::get('controllerPath');
+$controllerName = Registry::get('controllerName');
+$viewData = isset($this->viewData) ? $this->viewData : array();
+
+$viewAction = isset($this->viewAction) ? $this->viewAction : "";
+
+$viewAlert = isset($this->viewAlert) ? $this->viewAlert : "";
+$viewSuccess = isset($this->viewSuccess) ? $this->viewSuccess : "";
+
+$listURL = $baseUrl . strtolower($controllerPath) . "/" . strtolower($viewAction);
+
+$dataTarget = array(
+    array("id" => "all", "name" => "Semua"),
+    array("id" => "ref", "name" => "Referensi"),
+    array("id" => "user", "name" => "Pengguna"),
+    array("id" => "posting", "name" => "Posting"),
+    array("id" => "letter", "name" => "Surat")
+);
+$dataType = array(
+    array("id" => "text", "name" => "Teks Pendek"),
+    array("id" => "textarea", "name" => "Teks Panjang"),
+    array("id" => "number", "name" => "Angka"),
+    array("id" => "select", "name" => "Pilihan Tunggal"),
+    array("id" => "multi-select", "name" => "Pilihan Multi"),
+    array("id" => "date", "name" => "Tanggal"),
+    array("id" => "time", "name" => "Waktu"),
+    array("id" => "datetime", "name" => "Tanggal dan Waktu"),
+    array("id" => "auto-number", "name" => "Nomor Otomatis"),
+);
+?>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <button data-toggle="modal" data-target="#dialog-add" class="btn waves-effect waves-light btn-success">
+                    <i class="fas fa-plus-circle"></i>&nbsp; Tambah Data
+                </button>
+            </div>
+        </div>
+    </div>
+    <?php if ($viewSuccess) { ?>
+        <div class="col-md-12">
+            <div class="alert alert-success alert-dismissible bg-success text-white border-0 fade show" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <?php echo $viewSuccess ?>
+            </div>
+        </div>
+    <?php } ?>
+    <?php if ($viewAlert) { ?>
+        <div class="col-md-12">
+            <div class="alert alert-danger alert-dismissible bg-danger text-white border-0 fade show" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <?php echo $viewAlert ?>
+            </div>
+        </div>
+    <?php } ?>
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered display no-wrap datatable" style="width:100%">
+                                <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th width="60"></th>
+                                    <th>Nama</th>
+                                    <th>Kunci</th>
+                                    <th>Jenis</th>
+                                    <th>Target</th>
+                                    <th>Kepala</th>
+                                </tr>
+                                </thead>
+                                <?php
+                                if ($viewData) {
+                                    $data = $helper->getArrayValue($viewData, "data");
+                                    $total = $helper->getArrayValue($viewData, "total");
+
+                                    if ($data){
+                                        ?>
+                                        <tbody>
+                                        <?php
+                                        $no = 0;
+                                        foreach ($data as $item) {
+                                            $no++;
+                                            $id = $helper->getArrayValue($item, "id");
+                                            $type = $helper->getArrayValue($item, "type");
+                                            $target = $helper->getArrayValue($item, "target");
+                                            $kepala = $helper->getArrayValue($item, "parent-name");
+
+                                            $typeName = '';
+                                            $targetName = 'Tidak Ada';
+
+                                            if ($type) {
+                                                foreach ($dataType as $itemType) {
+                                                    if ($type == $itemType["id"]) {
+                                                        $typeName = $itemType["name"];
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
+                                            if ($target) {
+                                                foreach ($dataTarget as $itemTarget) {
+                                                    if ($target == $itemTarget["id"]) {
+                                                        $targetName = $itemTarget["name"];
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
+                                            $item["DT_RowId"] = $id;
+                                            $item["no"] = $no;
+                                            $item["type_name"] = $typeName;
+                                            $item["target_name"] = $targetName;
+
+                                            ?>
+                                            <tr data-key="id" data-value="<?php echo $id; ?>">
+                                                <td width="20" data-key="no" data-text="no" align="right" data-value="<?php echo $no; ?>" data-edit="false"><?php echo $item["no"] ?></td>
+                                                <td width="60" data-key="" data-edit="false" data-input="action">
+                                                        <textarea style="display: none" class="item-data" data-id="<?php echo $id ?>">
+                                                            <?php echo json_encode($item, true) ?>
+                                                        </textarea>
+                                                    <button data-id="<?php echo $id ?>" class="btn btn-sm btn-warning btn-item-edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <?php if (in_array($type, array("select", "multi-select"))) { ?>
+                                                        <a title="Daftar" href="<?php echo "$listURL/$id" ?>" class="btn btn-sm btn-primary bg-gradient-primary">
+                                                            <i class="fas fa-list-alt"></i>
+                                                        </a>
+                                                    <?php } ?>
+                                                    <button data-id="<?php echo $id ?>" class="btn btn-sm btn-danger btn-item-delete">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                                <td data-key="name"><?php echo $item["name"] ?></td>
+                                                <td data-key="slug"><?php echo $item["slug"] ?></td>
+                                                <td data-key="type"><?php echo $typeName ?></td>
+                                                <td data-key="target"><?php echo $targetName ?></td>
+                                                <td data-key="target"><?php echo $kepala ?></td>
+                                            </tr>
+                                            <?php
+                                        }
+                                        ?>
+                                        </tbody>
+                                        <?php
+                                    }
+                                }
+                                ?>
+                                <!--
+                                <tfoot>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Kunci</th>
+                                    <th>Jenis</th>
+                                    <th>Target</th>
+                                    <th>Target</th>
+                                </tr>
+                                </tfoot>
+                                -->
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

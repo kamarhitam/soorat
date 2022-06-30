@@ -1,0 +1,25 @@
+[template]header-1[/template]
+[report]title[/report]
+<table width="100%" cellspacing="0" cellpadding="4" border="0">
+    <tr>
+        <td align="center" width="25%">&nbsp;</td>
+        <td align="right" width="25%">Bulan : [data]bulan[/data]</td>
+        <td align="left" width="25%">Tahun : [data]tahun[/data]</td>
+        <td align="center" width="25%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td colspan="4" style="line-height:5pt">&nbsp;</td>
+    </tr>
+</table>
+<table border="0" style="line-height:18pt;border:2px solid #444;border-collapse:collapse;font-size:10pt;" width="100%" cellspacing="0" cellpadding="4">
+    <thead>
+    <tr>
+        [loop field=cols]
+        <th style="font-weight:bold;border:1px solid #666;text-align:center;width:[#field]size[/#field]px">[#field]name[/#field]</th>
+        [/loop]
+    </tr>
+    </thead>
+    <tbody>
+    {{content}}
+    </tbody>
+</table>

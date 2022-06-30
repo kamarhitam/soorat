@@ -1,0 +1,157 @@
+<?php
+use NG\Uri;
+$baseUrl = Uri::baseUrl();
+$config = $this->config;
+$helper = $this->helper;
+$viewAlert = isset($this->viewAlert) ? $this->viewAlert : "";
+$viewSuccess = isset($this->viewSuccess) ? $this->viewSuccess : "";
+
+$viewDataMetaChildren = isset($this->viewDataMetaChildren) ? $this->viewDataMetaChildren : "";
+$dataMetaChildren = null;
+if ($viewDataMetaChildren) {
+    $dataMetaChildren = $helper->getArrayValue($viewDataMetaChildren, "data");
+}
+
+?>
+
+<div class="modal modal-danger fade" id="dialog-delete">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <form role="form" id="form-delete" method="post">
+            <div class="modal-content">
+                <div class="modal-header bg-danger">
+                    <h4 class="modal-title text-light">Hapus Data</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
+                        <span aria-hidden="true" class="text-white">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="modal-error-body">
+                    <input type="hidden" id="del-meta-id" name="del-meta-id" data-field="id">
+                    Yakin ingin menghapus data?
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="submit" name="action" class="btn btn-danger" value="delete">Ya</button>
+                    <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="dialog-add" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content">
+            <form role="form" id="form-add" method="post">
+                <div class="modal-header bg-success">
+                    <h4 class="modal-title text-light">Tambah Data</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <?php
+                        if ($dataMetaChildren) {
+                            foreach ($dataMetaChildren as $itemMeta) {
+                                $metaId = $helper->getArrayValue($itemMeta, "id");
+                                $metaSlug = $helper->getArrayValue($itemMeta, "slug");
+                                $metaTitle = $helper->getArrayValue($itemMeta, "name");
+                                $metaType = $helper->getArrayValue($itemMeta, "type");
+                                ?>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="add-value-<?php echo $metaId ?>" class="col-form-label">
+                                            <?php echo $metaTitle ?>
+                                        </label>
+                                        <input type="hidden" class="form-control" id="add-type-<?php echo $metaId ?>"
+                                               name="add-type[<?php echo $metaId ?>]" value="<?php echo $metaType ?>">
+                                        <input type="text" class="form-control" id="add-value-<?php echo $metaId ?>"
+                                               name="add-value[<?php echo $metaId ?>]" placeholder="<?php echo $metaTitle ?>">
+                                    </div>
+                                </div>
+                                <?php
+                            }
+                        } else {
+                            ?>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="add-value" class="col-form-label">Nilai</label>
+                                    <input type="text" class="form-control" id="add-value" name="add-value" placeholder="Nilai">
+                                </div>
+                            </div>
+                            <?php
+                        }
+                        ?>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" name="action" class="btn btn-success" value="add">
+                        <i class="fas fa-save"></i>&nbsp;&nbsp;Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="dialog-edit" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content">
+            <form role="form" id="form-edit" method="post">
+                <div class="modal-header bg-warning">
+                    <h4 class="modal-title text-dark">Ubah Data</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <?php
+                        if ($dataMetaChildren) {
+                            $i = 0;
+                            foreach ($dataMetaChildren as $itemMeta) {
+                                $metaId = $helper->getArrayValue($itemMeta, "id");
+                                $metaSlug = $helper->getArrayValue($itemMeta, "slug");
+                                $metaTitle = $helper->getArrayValue($itemMeta, "name");
+                                $metaType = $helper->getArrayValue($itemMeta, "type");
+                                ?>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="edit-value-<?php echo $metaId ?>" class="col-form-label">
+                                            <?php echo $metaTitle ?>
+                                        </label>
+                                        <input type="hidden" class="form-control" id="edit-num-<?php echo $metaId ?>"
+                                               name="edit-id[<?php echo $metaId ?>]" data-field="id[<?php echo $i ?>]">
+                                        <input type="hidden" class="form-control" id="add-type-<?php echo $metaId ?>"
+                                               name="edit-type[<?php echo $metaId ?>]" value="<?php echo $metaType ?>">
+                                        <input type="text" class="form-control" id="add-value-<?php echo $metaId ?>"
+                                               data-field="value[<?php echo $i ?>]"
+                                               name="edit-value[<?php echo $metaId ?>]" placeholder="<?php echo $metaTitle ?>">
+                                    </div>
+                                </div>
+                                <?php
+                                $i++;
+                            }
+                        } else {
+                            ?>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="edit-value" class="col-form-label">Nilai</label>
+                                    <input type="hidden" class="form-control" id="edit-id" name="edit-id" data-field="id">
+                                    <input type="text" class="form-control" id="edit-value" name="edit-value" placeholder="Nilai" data-field="value">
+                                </div>
+                            </div>
+                            <?php
+                        }
+                        ?>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" name="action" class="btn btn-warning" value="edit">
+                        <i class="fas fa-save"></i>&nbsp;&nbsp;Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+

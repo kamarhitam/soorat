@@ -1,0 +1,100 @@
+<?php
+use NG\Uri;
+$baseUrl = Uri::baseUrl();
+$config = $this->config;
+$helper = $this->helper;
+$viewAlert = isset($this->viewAlert) ? $this->viewAlert : "";
+$viewSuccess = isset($this->viewSuccess) ? $this->viewSuccess : "";
+$viewDataInput = isset($this->viewDataInput) ? $this->viewDataInput : "";
+$dataMeta = null;
+?>
+
+<div class="modal modal-danger fade" id="dialog-delete">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <form role="form" id="form-delete" method="post">
+            <div class="modal-content">
+                <div class="modal-header bg-danger">
+                    <h4 class="modal-title text-light">Hapus Data</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
+                        <span aria-hidden="true" class="text-white">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="modal-error-body">
+                    <input type="hidden" id="del-input-id" name="del-input-id" data-field="id">
+                    Yakin ingin menghapus data?
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="submit" name="action" class="btn btn-danger" value="delete">Ya</button>
+                    <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="dialog-form" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content">
+            <form role="form" id="form-edit" method="post">
+                <div class="modal-header bg-warning">
+                    <h4 class="modal-title text-dark">Ubah Data</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="input-post-id" name="input-post-id" data-field="id">
+                    <div class="form-group row">
+                        <div class="col-md-12">
+                            <?php
+                            if ($viewDataInput){
+                                ?>
+                                <table class="table table-bordered table-striped datatable">
+                                    <thead>
+                                    <tr>
+                                        <th class="text-center" width="20"></th>
+                                        <th class="text-center" width="20">Urut</th>
+                                        <th class="text-center" width="150">Judul</th>
+                                        <th class="text-center" width="150">Kunci</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php
+                                    $rows = $viewDataInput["data"];
+                                    if ($rows){
+                                        foreach ($rows as $row){
+                                            $idType = $row["id"];
+                                            $nameType = $row["title"];
+                                            $slugType = $row["slug"];
+                                            ?>
+                                            <tr>
+                                                <td class="text-center">
+                                                    <input data-id="<?php echo $idType ?>" class="chkForms" type="checkbox"
+                                                           value="<?php echo $idType ?>" name="forms[<?php echo $idType ?>]">
+                                                </td>
+                                                <td>
+                                                    <input value="1" data-id="<?php echo $idType ?>" class="form-control text-right txtNums"
+                                                           name="nums[<?php echo $idType ?>]">
+                                                </td>
+                                                <td><?php echo $nameType ?></td>
+                                                <td><?php echo $slugType ?></td>
+                                            </tr>
+                                        <?php }
+                                    }
+                                    ?>
+                                    </tbody>
+                                </table>
+                            <?php } ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" name="action" class="btn btn-warning" value="meta-input">
+                        <i class="fas fa-save"></i>&nbsp;&nbsp;Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+

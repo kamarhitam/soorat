@@ -1,0 +1,295 @@
+<?php
+use NG\Uri;
+$baseUrl = Uri::baseUrl();
+$config = $this->config;
+$helper = $this->helper;
+$viewAlert = isset($this->viewAlert) ? $this->viewAlert : "";
+$viewSuccess = isset($this->viewSuccess) ? $this->viewSuccess : "";
+$viewData = isset($this->viewData) ? $this->viewData : array();
+
+$dataInput = null;
+if ($viewData) {
+    $dataInput = $helper->getArrayValue($viewData, 'data');
+}
+
+$dataType = array(
+    array("id" => "text", "name" => "Teks Pendek"),
+    array("id" => "textarea", "name" => "Teks Panjang"),
+    array("id" => "number", "name" => "Angka"),
+    array("id" => "select", "name" => "Pilihan Tunggal"),
+    array("id" => "multi-select", "name" => "Pilihan Multi"),
+    array("id" => "date", "name" => "Tanggal"),
+    array("id" => "time", "name" => "Waktu"),
+    array("id" => "datetime", "name" => "Tanggal dan Waktu"),
+    array("id" => "auto-number", "name" => "Nomor Otomatis"),
+);
+
+$dataSource = array(
+    array("id" => "", "name" => "Tidak Ada"),
+    array("id" => "user", "name" => "Pengguna"),
+    array("id" => "day", "name" => "Hari"),
+    array("id" => "date", "name" => "Tanggal"),
+    array("id" => "month", "name" => "Bulan"),
+    array("id" => "year", "name" => "Tahun"),
+);
+
+$dataFormat = array(
+    array("id" => "", "name" => "Tidak Ada"),
+    array("id" => "roman", "name" => "Romawi"),
+    array("id" => "spell", "name" => "Terbilang"),
+    array("id" => "numeric", "name" => "Numeric"),
+    array("id" => "ucase", "name" => "Huruf Besar"),
+    array("id" => "lcase", "name" => "Huruf Kecil"),
+    array("id" => "00", "name" => "Penomoran: 01"),
+    array("id" => "000", "name" => "Penomoran: 001"),
+    array("id" => "0000", "name" => "Penomoran: 0001"),
+    array("id" => "00000", "name" => "Penomoran: 00001"),
+);
+
+$dataMeta = null;
+$clsRefMeta = new Meta();
+$viewDataMeta = $clsRefMeta->fetchSelect(0);
+if ($viewDataMeta) {
+    $dataMeta = $helper->getArrayValue($viewDataMeta, 'data');
+}
+?>
+
+<div class="modal modal-danger fade" id="dialog-delete">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <form role="form" id="form-delete" method="post">
+            <div class="modal-content">
+                <div class="modal-header bg-danger">
+                    <h4 class="modal-title text-light">Hapus Data</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
+                        <span aria-hidden="true" class="text-white">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="modal-error-body">
+                    <input type="hidden" id="del-input-id" name="del-input-id" data-field="id">
+                    Yakin ingin menghapus data?
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="submit" name="action" class="btn btn-danger" value="delete">Ya</button>
+                    <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="dialog-add" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content">
+            <form role="form" id="form-add" method="post">
+                <div class="modal-header bg-success">
+                    <h4 class="modal-title text-light">Tambah Data</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="add-title" class="col-form-label">Judul</label>
+                                <input type="text" class="form-control" id="add-title" name="add-title" placeholder="Judul">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="add-type" class="col-form-label">Jenis</label>
+                                <select class="form-control select2bs4" id="add-type" name="add-type" data-type="select">
+                                    <?php
+                                    foreach ($dataType as $itemType){
+                                        $idType = $itemType["id"];
+                                        $nameType = $itemType["name"];
+                                        ?>
+                                        <option value="<?php echo $idType ?>"><?php echo $nameType ?></option>
+                                        <?php
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="add-format" class="col-form-label">Format</label>
+                                <select class="form-control select2bs4" id="add-format" name="add-format" data-type="select">
+                                    <?php
+                                    foreach ($dataFormat as $itemFormat){
+                                        $idType = $itemFormat["id"];
+                                        $nameType = $itemFormat["name"];
+                                        ?>
+                                        <option value="<?php echo $idType ?>"><?php echo $nameType ?></option>
+                                        <?php
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="add-source" class="col-form-label">Sumber Data</label>
+                                <select class="form-control select2bs4" id="add-source" name="add-source" data-type="select">
+                                    <?php
+                                    foreach ($dataSource as $itemSource){
+                                        $idSource = $itemSource["id"];
+                                        $nameSource = $itemSource["name"];
+                                        ?>
+                                        <option value="<?php echo $idSource ?>"><?php echo $nameSource ?></option>
+                                        <?php
+                                    }
+                                    if ($dataMeta) {
+                                        foreach ($dataMeta as $itemMeta){
+                                            $idSource = "meta#" . $itemMeta["slug"];
+                                            $nameSource = $itemMeta["name"];
+                                            ?>
+                                            <option value="<?php echo $idSource ?>"><?php echo $nameSource ?></option>
+                                            <?php
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="add-parent" class="col-form-label">Kepala</label>
+                                <select class="form-control select2bs4" id="add-parent" name="add-parent" data-type="select">
+                                    <option value="0">Tidak Ada</option>
+                                    <?php
+                                    foreach ($dataInput as $itemInput){
+                                        $idType = $itemInput["id"];
+                                        $nameType = $itemInput["title"];
+                                        ?>
+                                        <option value="<?php echo $idType ?>"><?php echo $nameType ?></option>
+                                        <?php
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" name="action" class="btn btn-success" value="add">
+                        <i class="fas fa-save"></i>&nbsp;&nbsp;Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="dialog-edit" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content">
+            <form role="form" id="form-edit" method="post">
+                <div class="modal-header bg-warning">
+                    <h4 class="modal-title text-dark">Ubah Data</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="edit-title" class="col-form-label">Judul</label>
+                                <input type="hidden" class="form-control" id="edit-id" name="edit-id" data-field="id">
+                                <input type="text" class="form-control" id="edit-title" name="edit-title" placeholder="Judul" data-field="title">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="edit-slug" class="col-form-label">Kunci</label>
+                                <input type="text" class="form-control" id="edit-slug" name="edit-slug" placeholder="Kunci" data-field="slug">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="edit-type" class="col-form-label">Jenis</label>
+                                <select class="form-control select2bs4" id="edit-type" name="edit-type" data-type="select" data-field="type">
+                                    <?php
+                                    foreach ($dataType as $itemType){
+                                        $idType = $itemType["id"];
+                                        $nameType = $itemType["name"];
+                                        ?>
+                                        <option value="<?php echo $idType ?>"><?php echo $nameType ?></option>
+                                        <?php
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="edit-format" class="col-form-label">Format</label>
+                                <select class="form-control select2bs4" id="edit-format"
+                                        name="edit-format" data-type="select" data-field="format">
+                                    <?php
+                                    foreach ($dataFormat as $itemFormat){
+                                        $idType = $itemFormat["id"];
+                                        $nameType = $itemFormat["name"];
+                                        ?>
+                                        <option value="<?php echo $idType ?>"><?php echo $nameType ?></option>
+                                        <?php
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="edit-source" class="col-form-label">Sumber Data</label>
+                                <select class="form-control select2bs4" id="edit-source" name="edit-source" data-type="select" data-field="source">
+                                    <?php
+                                    foreach ($dataSource as $itemSource){
+                                        $idSource = $itemSource["id"];
+                                        $nameSource = $itemSource["name"];
+                                        ?>
+                                        <option value="<?php echo $idSource ?>"><?php echo $nameSource ?></option>
+                                        <?php
+                                    }
+                                    if ($dataMeta) {
+                                        foreach ($dataMeta as $itemMeta){
+                                            $idSource = "meta#" . $itemMeta["slug"];
+                                            $nameSource = $itemMeta["name"];
+                                            ?>
+                                            <option value="<?php echo $idSource ?>"><?php echo $nameSource ?></option>
+                                            <?php
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="edit-parent" class="col-form-label">Kepala</label>
+                                <select class="form-control select2bs4" id="edit-parent" name="edit-parent" data-type="select" data-field="parent">
+                                    <option value="0">Tidak Ada</option>
+                                    <?php
+                                    foreach ($dataInput as $itemInput){
+                                        $idType = $itemInput["id"];
+                                        $nameType = $itemInput["title"];
+                                        ?>
+                                        <option value="<?php echo $idType ?>"><?php echo $nameType ?></option>
+                                        <?php
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" name="action" class="btn btn-warning" value="edit">
+                        <i class="fas fa-save"></i>&nbsp;&nbsp;Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+

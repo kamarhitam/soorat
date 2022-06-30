@@ -1,0 +1,9 @@
+{
+	"dbtype": "mysql",
+	"port": 3306,
+	"host": "localhost",
+	"dbname": "surat",
+	"username": "root",
+	"password": "",
+	"charset": "utf8"
+}

@@ -1,0 +1,200 @@
+<?php
+use NG\Uri;
+$baseUrl = Uri::baseUrl();
+$config = $this->config;
+$helper = $this->helper;
+$viewAlert = isset($this->viewAlert) ? $this->viewAlert : "";
+$viewSuccess = isset($this->viewSuccess) ? $this->viewSuccess : "";
+
+$viewDataAction = isset($this->viewDataAction) ? $this->viewDataAction : array();
+
+$menu = isset($this->menu) ? $this->menu : array();
+$listMenu = array();
+
+if ($menu){
+    $listMenu = $helper->collectMenu($menu);
+}
+
+?>
+
+<div class="modal modal-danger fade" id="dialog-delete">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <form role="form" id="form-delete" method="post">
+            <div class="modal-content">
+                <div class="modal-header bg-danger">
+                    <h4 class="modal-title text-light">Hapus Data</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
+                        <span aria-hidden="true" class="text-white">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="modal-error-body">
+                    <input type="hidden" id="del-role-id" name="del-role-id" data-field="id">
+                    Yakin ingin menghapus data?
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="submit" name="action" class="btn btn-danger" value="delete">Ya</button>
+                    <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="dialog-add" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content">
+            <form role="form" id="form-add" method="post">
+                <div class="modal-header bg-success">
+                    <h4 class="modal-title text-light">Tambah Data</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="add-id" class="col-form-label">ID</label>
+                                <input type="text" class="form-control" id="add-id" name="add-id" placeholder="ID (Opsional)">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="add-menu" class="col-form-label">Menu</label>
+                                <select class="form-control select2bs4" id="add-menu" name="add-menu" data-type="select">
+                                    <?php
+                                    if ($listMenu){
+                                        foreach ($listMenu as $itemMenu){
+                                            $idMenu = $itemMenu["id"];
+                                            $textMenu = $itemMenu["text"];
+                                            ?>
+                                            <option value="<?php echo $idMenu ?>"><?php echo "$idMenu - $textMenu" ?></option>
+                                            <?php
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="add-action" class="col-form-label">Aksi</label>
+                                <select class="form-control select2bs4" id="add-action" name="add-action" data-type="select">
+                                    <?php
+                                    if ($viewDataAction){
+                                        $listAction = $viewDataAction["data"];
+                                        foreach ($listAction as $itemAction){
+                                            $idAction = $itemAction["id"];
+                                            $nameAction = $itemAction["name"];
+                                            ?>
+                                            <option value="<?php echo $idAction ?>"><?php echo $nameAction ?></option>
+                                            <?php
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="add-name" class="col-form-label">Nama</label>
+                                <input type="text" class="form-control" id="add-name" name="add-name" placeholder="Nama">
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="add-description" class="col-form-label">Deskripsi</label>
+                                <textarea class="form-control" id="add-description" name="add-description" placeholder="Deskripsi"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" name="action" class="btn btn-success" value="add">
+                        <i class="fas fa-save"></i>&nbsp;&nbsp;Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="dialog-edit" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content">
+            <form role="form" id="form-edit" method="post">
+                <div class="modal-header bg-warning">
+                    <h4 class="modal-title text-dark">Ubah Data</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="edit-id" class="col-form-label">ID</label>
+                                <input type="text" class="form-control" id="edit-id" name="edit-id" placeholder="ID" data-field="id">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="edit-menu" class="col-form-label">Menu</label>
+                                <select class="form-control select2bs4" id="edit-menu" name="edit-menu" data-type="select" data-field="idmenu">
+                                    <?php
+                                    if ($listMenu){
+                                        foreach ($listMenu as $itemMenu){
+                                            $idMenu = $itemMenu["id"];
+                                            $textMenu = $itemMenu["text"];
+                                            ?>
+                                            <option value="<?php echo $idMenu ?>"><?php echo "$idMenu - $textMenu" ?></option>
+                                            <?php
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="edit-action" class="col-form-label">Aksi</label>
+                                <select class="form-control select2bs4" id="edit-action" name="edit-action" data-type="select" data-field="idaction">
+                                    <?php
+                                    if ($viewDataAction){
+                                        $listAction = $viewDataAction["data"];
+                                        foreach ($listAction as $itemAction){
+                                            $idAction = $itemAction["id"];
+                                            $nameAction = $itemAction["name"];
+                                            ?>
+                                            <option value="<?php echo $idAction ?>"><?php echo $nameAction ?></option>
+                                            <?php
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="edit-name" class="col-form-label">Nama</label>
+                                <input type="text" class="form-control" id="edit-name" name="edit-name" placeholder="Nama" data-field="name">
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="edit-description" class="col-form-label">Deskripsi</label>
+                                <textarea class="form-control" id="edit-description" name="edit-description" placeholder="Deskripsi" data-field="description"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" name="action" class="btn btn-warning" value="edit">
+                        <i class="fas fa-save"></i>&nbsp;&nbsp;Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+

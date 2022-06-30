@@ -1,0 +1,126 @@
+[
+    {
+        "id": "100000",
+        "text": "Dasbor",
+        "icon": "desktop",
+        "path": "dasbor"
+    },
+    {
+        "id": "200000",
+        "text": "-"
+    },
+    {
+        "id": "210000",
+        "text": "Referensi"
+    },
+    {
+        "id": "211000",
+        "text": "Pengguna",
+        "icon": "users",
+        "children": [
+            {
+                "id": "211001",
+                "text": "Tipe",
+                "path": "ref/tipe-pengguna"
+            },
+            {
+                "id": "211002",
+                "text": "Peran",
+                "path": "ref/peran-pengguna"
+            }
+        ]
+    },
+    {
+        "id": "212000",
+        "text": "Meta",
+        "icon": "link",
+        "path": "ref/meta"
+    },
+    {
+        "id": "213000",
+        "text": "Konstanta",
+        "icon": "bookmark",
+        "path": "ref/konstanta"
+    },
+    {
+        "id": "300000",
+        "text": "-"
+    },
+    {
+        "id": "310000",
+        "text": "Pengguna"
+    },
+    {
+        "id": "311000",
+        "text": "Pengguna",
+        "icon": "user",
+        "path": "pengguna"
+    },
+    {
+        "id": "312000",
+        "text": "Peranan",
+        "icon": "user-secret",
+        "path": "pengguna/peranan",
+        "hidden": true
+    },
+    {
+        "id": "313000",
+        "text": "Profil",
+        "icon": "user-circle",
+        "path": "pengguna/profil"
+    },
+    {
+        "id": "400000",
+        "text": "-"
+    },
+    {
+        "id": "410000",
+        "text": "CMS"
+    },
+    {
+        "id": "411000",
+        "text": "Tipe",
+        "icon": "paste",
+        "path": "cms/tipe",
+        "hidden": true
+    },
+    {
+        "id": "412000",
+        "text": "Kategori",
+        "icon": "list-alt",
+        "path": "cms/kategori",
+        "hidden": true
+    },
+    {
+        "id": "413000",
+        "text": "Galeri",
+        "icon": "box",
+        "path": "cms/galeri"
+    },
+    {
+        "id": "414000",
+        "text": "Input",
+        "icon": "list",
+        "path": "cms/input"
+    },
+    {
+        "id": "415000",
+        "text": "Posting",
+        "icon": "location-arrow",
+        "path": "cms/posting"
+    },
+    {
+        "id": "500000",
+        "text": "-"
+    },
+    {
+        "id": "510000",
+        "text": "Surat"
+    },
+    {
+        "id": "515000",
+        "text": "Daftar Surat",
+        "icon": "edit",
+        "path": "surat"
+    }
+]

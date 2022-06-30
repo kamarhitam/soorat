@@ -1,0 +1,210 @@
+<?php
+
+use NG\Registry;
+use NG\Uri;
+$helper = $this->helper;
+$baseUrl = Uri::baseUrl();
+$config = Registry::get('config');
+$controllerPath = Registry::get('controllerPath');
+$controllerName = Registry::get('controllerName');
+$viewData = isset($this->viewData) ? $this->viewData : array();
+
+$viewAction = isset($this->viewAction) ? $this->viewAction : "";
+
+$viewAlert = isset($this->viewAlert) ? $this->viewAlert : "";
+$viewSuccess = isset($this->viewSuccess) ? $this->viewSuccess : "";
+
+$listURL = $baseUrl . strtolower($controllerPath) . "/" . strtolower($viewAction);
+
+$dataType = array(
+    array("id" => "text", "name" => "Teks Pendek"),
+    array("id" => "textarea", "name" => "Teks Panjang"),
+    array("id" => "number", "name" => "Angka"),
+    array("id" => "select", "name" => "Pilihan Tunggal"),
+    array("id" => "multi-select", "name" => "Pilihan Multi"),
+    array("id" => "date", "name" => "Tanggal"),
+    array("id" => "time", "name" => "Waktu"),
+    array("id" => "datetime", "name" => "Tanggal dan Waktu"),
+    array("id" => "auto-number", "name" => "Nomor Otomatis"),
+);
+$dataMeta = null;
+$clsRefMeta = new Meta();
+$viewDataMeta = $clsRefMeta->fetchSelect(0);
+if ($viewDataMeta) {
+    $dataMeta = $helper->getArrayValue($viewDataMeta, 'data');
+}
+
+$dataSource = array(
+    array("id" => "", "name" => "Tidak Ada"),
+    array("id" => "user", "name" => "Pengguna"),
+    array("id" => "day", "name" => "Hari"),
+    array("id" => "date", "name" => "Tanggal"),
+    array("id" => "month", "name" => "Bulan"),
+    array("id" => "year", "name" => "Tahun"),
+);
+$dataFormat = array(
+    array("id" => "", "name" => "Tidak Ada"),
+    array("id" => "roman", "name" => "Romawi"),
+    array("id" => "spell", "name" => "Terbilang"),
+    array("id" => "numeric", "name" => "Numerik"),
+    array("id" => "ucase", "name" => "Huruf Besar"),
+    array("id" => "lcase", "name" => "Huruf Kecil"),
+    array("id" => "00", "name" => "Penomoran: 01"),
+    array("id" => "000", "name" => "Penomoran: 001"),
+    array("id" => "0000", "name" => "Penomoran: 0001"),
+    array("id" => "00000", "name" => "Penomoran: 00001"),
+);
+
+if ($dataMeta) {
+    foreach ($dataMeta as $itemType){
+        $idType = "meta#" . $itemType["slug"];
+        $nameType = $itemType["name"];
+        $dataSource[] = array("id" => $idType, "name" => $nameType);
+    }
+}
+?>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <button data-toggle="modal" data-target="#dialog-add" class="btn waves-effect waves-light btn-success">
+                    <i class="fas fa-plus-circle"></i>&nbsp; Tambah Data
+                </button>
+            </div>
+        </div>
+    </div>
+    <?php if ($viewSuccess) { ?>
+        <div class="col-md-12">
+            <div class="alert alert-success alert-dismissible bg-success text-white border-0 fade show" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <?php echo $viewSuccess ?>
+            </div>
+        </div>
+    <?php } ?>
+    <?php if ($viewAlert) { ?>
+        <div class="col-md-12">
+            <div class="alert alert-danger alert-dismissible bg-danger text-white border-0 fade show" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <?php echo $viewAlert ?>
+            </div>
+        </div>
+    <?php } ?>
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered display no-wrap datatable" style="width:100%">
+                                <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th width="60"></th>
+                                    <th>Judul</th>
+                                    <th>Kunci</th>
+                                    <th>Jenis</th>
+                                    <th>Format</th>
+                                    <th>Sumber</th>
+                                    <th>Kepala</th>
+                                </tr>
+                                </thead>
+                                <?php
+                                if ($viewData) {
+                                    $data = $helper->getArrayValue($viewData, "data");
+                                    $total = $helper->getArrayValue($viewData, "total");
+
+                                    if ($data){
+                                        ?>
+                                        <tbody>
+                                        <?php
+                                        $no = 0;
+                                        foreach ($data as $item) {
+                                            $no++;
+                                            $id = $helper->getArrayValue($item, "id");
+                                            $type = $helper->getArrayValue($item, "type");
+                                            $source = $helper->getArrayValue($item, "source");
+                                            $format = $helper->getArrayValue($item, "format");
+                                            $parentName = $helper->getArrayValue($item, "parent-name");
+
+                                            $typeName = 'Tidak Ada';
+                                            $sourceName = 'Tidak Ada';
+                                            $formatName = 'Tidak Ada';
+
+                                            if ($type) {
+                                                foreach ($dataType as $itemType) {
+                                                    if ($type == $itemType["id"]) {
+                                                        $typeName = $itemType["name"];
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
+                                            if ($format) {
+                                                foreach ($dataFormat as $itemFormat) {
+                                                    if ($format == $itemFormat["id"]) {
+                                                        $formatName = $itemFormat["name"];
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
+                                            if ($source) {
+                                                foreach ($dataSource as $itemSource) {
+                                                    if ($source == $itemSource["id"]) {
+                                                        $sourceName = $itemSource["name"];
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
+                                            $item["DT_RowId"] = $id;
+                                            $item["no"] = $no;
+                                            $item["type_name"] = $typeName;
+                                            $item["source_name"] = $sourceName;
+
+                                            ?>
+                                            <tr data-key="id" data-value="<?php echo $id; ?>">
+                                                <td width="20" data-key="no" data-text="no" align="right" data-value="<?php echo $no; ?>" data-edit="false"><?php echo $item["no"] ?></td>
+                                                <td width="60" data-key="" data-edit="false" data-input="action">
+                                                        <textarea style="display: none" class="item-data" data-id="<?php echo $id ?>">
+                                                            <?php echo json_encode($item, true) ?>
+                                                        </textarea>
+                                                    <button data-id="<?php echo $id ?>" class="btn btn-sm btn-warning btn-item-edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <?php if (in_array($type, array("select", "multi-select"))) { ?>
+                                                        <a title="Daftar" href="<?php echo "$listURL/$id" ?>" class="btn btn-sm btn-primary">
+                                                            <i class="fas fa-list-alt"></i>
+                                                        </a>
+                                                    <?php } ?>
+                                                    <button data-id="<?php echo $id ?>" class="btn btn-sm btn-danger btn-item-delete">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                                <td data-key="name"><?php echo $item["title"] ?></td>
+                                                <td data-key="slug"><?php echo $item["slug"] ?></td>
+                                                <td data-key="type"><?php echo $typeName ?></td>
+                                                <td data-key="format"><?php echo $formatName ?></td>
+                                                <td data-key="source"><?php echo $sourceName ?></td>
+                                                <td data-key="parent"><?php echo $parentName ?></td>
+                                            </tr>
+                                            <?php
+                                        }
+                                        ?>
+                                        </tbody>
+                                        <?php
+                                    }
+                                }
+                                ?>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

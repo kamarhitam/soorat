@@ -1,0 +1,204 @@
+<?php
+
+use NG\Registry;
+use NG\Uri;
+$helper = $this->helper;
+$baseUrl = Uri::baseUrl();
+$config = Registry::get('config');
+$controllerPath = Registry::get('controllerPath');
+$controllerName = Registry::get('controllerName');
+$viewData = isset($this->viewData) ? $this->viewData : array();
+$viewDataMetaChildren = isset($this->viewDataMetaChildren) ? $this->viewDataMetaChildren : array();
+
+$viewAction = isset($this->viewAction) ? $this->viewAction : "";
+$viewId = isset($this->viewId) ? $this->viewId : 0;
+
+$viewAlert = isset($this->viewAlert) ? $this->viewAlert : "";
+$viewSuccess = isset($this->viewSuccess) ? $this->viewSuccess : "";
+
+$dataMetaChildren = null;
+if ($viewDataMetaChildren) {
+    $dataMetaChildren = $helper->getArrayValue($viewDataMetaChildren, "data");
+}
+
+$listURL = $baseUrl . strtolower($controllerPath) . "/" . strtolower($viewAction);
+?>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <button data-toggle="modal" data-target="#dialog-add" class="btn waves-effect waves-light btn-success">
+                    <i class="fas fa-plus-circle"></i>&nbsp; Tambah Data
+                </button>
+            </div>
+        </div>
+    </div>
+    <?php if ($viewSuccess) { ?>
+        <div class="col-md-12">
+            <div class="alert alert-success alert-dismissible bg-success text-white border-0 fade show" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <?php echo $viewSuccess ?>
+            </div>
+        </div>
+    <?php } ?>
+    <?php if ($viewAlert) { ?>
+        <div class="col-md-12">
+            <div class="alert alert-danger alert-dismissible bg-danger text-white border-0 fade show" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <?php echo $viewAlert ?>
+            </div>
+        </div>
+    <?php } ?>
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered display no-wrap datatable" style="width:100%">
+                                <?php if ($dataMetaChildren){
+                                    $columns = $helper->getArrayValue($viewData, "columns");
+                                    $abstract = $helper->getArrayValue($viewData, "rows");
+                                    $rowCount = 0;
+                                    $rows = array();
+                                    if ($abstract) {
+                                        for ($c = 0; $c < count($columns); $c++) {
+                                            $cells = $helper->getArrayValue($abstract, $c);
+                                            if ($cells) {
+                                                if (is_array($cells)) {
+                                                    $rowCount = count($cells);
+                                                    for ($r = 0; $r < $rowCount; $r++) {
+                                                        $rows[$r][$c] = $cells[$r];
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    ?>
+                                    <thead>
+                                    <tr>
+                                        <th width="20">No</th>
+                                        <th width="60"></th>
+                                        <?php if ($columns){
+                                            foreach ($columns as $column) {
+                                                $colId = $helper->getArrayValue($column, "id");
+                                                $colName = $helper->getArrayValue($column, "name");
+                                                ?>
+                                                <th><?php echo $colName ?></th>
+                                                <?php
+                                            }
+                                            ?>
+                                        <?php } ?>
+                                    </tr>
+                                    </thead>
+                                    <?php if ($rows) {
+                                        ?>
+                                        <tbody>
+                                        <?php
+                                        $no = 0;
+                                        $number = 0;
+                                        foreach ($rows as $row) {
+                                            $no++;
+                                            ?>
+                                            <tr>
+                                                <td width="20" data-key="no" data-text="no" align="right">
+                                                    <?php echo $no; ?>
+                                                </td>
+                                                <td width="60" data-input="action">
+                                                        <textarea style="display: none" class="item-data" data-id="<?php echo $number ?>">
+                                                            <?php echo json_encode(array("details" => $items), true) ?>
+                                                        </textarea>
+                                                    <button data-id="<?php echo $number ?>" class="btn btn-sm btn-warning btn-item-edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button data-id="<?php echo $number ?>" class="btn btn-sm btn-danger btn-item-delete">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                                <?php
+                                                $items = array();
+                                                foreach ($row as $cell) {
+                                                    $value = $helper->getArrayValue($cell, "value");
+                                                    $idMeta = $helper->getArrayValue($cell, "idmeta");
+                                                    $id = $helper->getArrayValue($cell, "id");
+                                                    $number = $helper->getArrayValue($cell, "num");
+                                                    $items["id"][] = $id;
+                                                    $items["idmeta"][] = $idMeta;
+                                                    $items["number"][] = $number;
+                                                    $items["value"][] = $value;
+                                                    ?>
+                                                    <td><?php echo $value; ?></td>
+                                                    <?php
+                                                }
+                                                ?>
+                                            </tr>
+                                            <?php
+                                        }
+                                        ?>
+                                        </tbody>
+                                    <?php } ?>
+                                <?php } else { ?>
+                                    <thead>
+                                    <tr>
+                                        <th width="20">No</th>
+                                        <th>Nilai</th>
+                                        <th width="60"></th>
+                                    </tr>
+                                    </thead>
+                                    <?php
+                                    if ($viewData) {
+                                        $data = $helper->getArrayValue($viewData, "data");
+                                        $total = $helper->getArrayValue($viewData, "total");
+
+                                        if ($data){
+                                            ?>
+                                            <tbody>
+                                            <?php
+                                            $no = 0;
+                                            foreach ($data as $item) {
+                                                $no++;
+                                                $id = $helper->getArrayValue($item, "id");
+                                                $value = $helper->getArrayValue($item, "value");
+
+                                                $item["DT_RowId"] = $id;
+                                                $item["no"] = $no;
+
+                                                ?>
+                                                <tr data-key="id" data-value="<?php echo $id; ?>">
+                                                    <td width="20" data-key="no" align="right" data-value="<?php echo $no; ?>">
+                                                        <?php echo $item["no"] ?>
+                                                    </td>
+                                                    <td data-key="value"><?php echo $value ?></td>
+                                                    <td width="60" data-key="" data-edit="false" data-input="action">
+                                                        <textarea style="display: none" class="item-data" data-id="<?php echo $id ?>">
+                                                            <?php echo json_encode($item, true) ?>
+                                                        </textarea>
+                                                        <button data-id="<?php echo $id ?>" class="btn btn-sm btn-warning btn-item-edit">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                        <button data-id="<?php echo $id ?>" class="btn btn-sm btn-danger btn-item-delete">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                <?php
+                                            }
+                                            ?>
+                                            </tbody>
+                                            <?php
+                                        }
+                                    }
+                                    ?>
+                                <?php } ?>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

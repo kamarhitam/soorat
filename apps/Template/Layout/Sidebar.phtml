@@ -1,0 +1,126 @@
+<?php
+
+use NG\Registry;
+use NG\Uri;
+
+$baseUrl = Uri::baseUrl();
+$menu = $this->menu;
+$helper = $this->helper;
+
+$viewActiveMenu = isset($this->viewActiveMenu) ? $this->viewActiveMenu : null;
+?>
+
+<!-- ============================================================== -->
+<!-- Left Sidebar - style you can find in sidebar.scss  -->
+<!-- ============================================================== -->
+<aside class="left-sidebar" data-sidebarbg="skin6">
+    <!-- Sidebar scroll-->
+    <div class="scroll-sidebar" data-sidebarbg="skin6">
+        <!-- Sidebar navigation-->
+        <nav class="sidebar-nav">
+            <ul id="sidebarnav">
+                <?php
+                foreach ($menu as $menuLevel0){
+                    $selectedLevel0 = '';
+                    $idLevel0 = $helper->getArrayValue($menuLevel0, "id", "");
+                    $textLevel0 = $helper->getArrayValue($menuLevel0, "text", "");
+                    $pathLevel0 = $helper->getArrayValue($menuLevel0, "path", "");
+                    $iconLevel0 = $helper->getArrayValue($menuLevel0, "icon", "");
+                    $hiddenLevel0 = $helper->getArrayValue($menuLevel0, "hidden", false);
+                    $childrenLevel0 = $helper->getArrayValue($menuLevel0, "children");
+                    if ($pathLevel0) {
+                        $pathLevel0 = $baseUrl . $pathLevel0;
+                    }
+                    if ($viewActiveMenu) {
+                        if (in_array($idLevel0, $viewActiveMenu)) {
+                            $selectedLevel0 = "selected";
+                        }
+                    }
+                    if (!$hiddenLevel0){
+                        if ($textLevel0 == "-") {
+                            ?>
+                            <li class="list-divider"></li>
+                            <?php
+                        } else {
+                            if ($pathLevel0) {
+                                ?>
+                                <li class="sidebar-item" <?php echo $selectedLevel0 ?>>
+                                    <a class="sidebar-link" href="<?php echo $pathLevel0 ?>" aria-expanded="false">
+                                        <?php if ($iconLevel0){ ?>
+                                            <i class="fas fa-<?php echo $iconLevel0 ?>"></i>
+                                        <?php } ?>
+                                        <span class="hide-menu"><?php echo $textLevel0 ?></span>
+                                    </a>
+                                </li>
+                                <?php
+                            } else {
+                                if ($childrenLevel0) {
+                                    ?>
+                                    <li class="sidebar-item" <?php echo $selectedLevel0 ?>>
+                                        <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
+                                            <i class="fas fa-<?php echo $iconLevel0 ?>"></i>
+                                            <span class="hide-menu"><?php echo $textLevel0 ?></span>
+                                        </a>
+                                        <ul aria-expanded="false" class="collapse first-level base-level-line">
+                                            <?php
+                                            foreach ($childrenLevel0 as $menuLevel1) {
+                                                $selectedLevel1 = '';
+                                                $idLevel1 = $helper->getArrayValue($menuLevel1, "id", "");
+                                                $textLevel1 = $helper->getArrayValue($menuLevel1, "text", "");
+                                                $pathLevel1 = $helper->getArrayValue($menuLevel1, "path", "");
+                                                $iconLevel1 = $helper->getArrayValue($menuLevel1, "icon", "");
+                                                $hiddenLevel1 = $helper->getArrayValue($menuLevel1, "hidden", false);
+                                                if ($pathLevel1) {
+                                                    $pathLevel1 = $baseUrl . $pathLevel1;
+                                                }
+                                                if ($viewActiveMenu) {
+                                                    if (in_array($idLevel1, $viewActiveMenu)) {
+                                                        $selectedLevel1 = "selected";
+                                                    }
+                                                }
+                                                if (!$hiddenLevel1){
+                                                    if ($textLevel1 == "-") {
+                                                        ?>
+                                                        <li class="list-divider"></li>
+                                                        <?php
+                                                    } else {
+                                                        if ($pathLevel1) {
+                                                            ?>
+                                                            <li class="sidebar-item" <?php echo $selectedLevel1 ?> <?php echo $selectedLevel1 ?>>
+                                                                <a class="sidebar-link" href="<?php echo $pathLevel1 ?>" aria-expanded="false">
+                                                                    <?php if ($iconLevel1){ ?>
+                                                                        <i class="fas fa-<?php echo $iconLevel1 ?>"></i>
+                                                                    <?php } ?>
+                                                                    <span class="hide-menu"><?php echo $textLevel1 ?></span>
+                                                                </a>
+                                                            </li>
+                                                            <?php
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            ?>
+                                        </ul>
+                                    </li>
+                                    <?php
+                                } else {
+                                    ?>
+                                    <li class="nav-small-cap">
+                                        <span class="hide-menu"><?php echo $textLevel0 ?></span>
+                                    </li>
+                                    <?php
+                                }
+                            }
+                        }
+                    }
+                }
+                ?>
+            </ul>
+        </nav>
+        <!-- End Sidebar navigation -->
+    </div>
+    <!-- End Sidebar scroll-->
+</aside>
+<!-- ============================================================== -->
+<!-- End Left Sidebar - style you can find in sidebar.scss  -->
+<!-- ============================================================== -->

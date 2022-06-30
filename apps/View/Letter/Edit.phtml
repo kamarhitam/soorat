@@ -1,0 +1,212 @@
+<?php
+
+use NG\Registry;
+use NG\Uri;
+$helper = $this->helper;
+$baseUrl = Uri::baseUrl();
+$config = Registry::get('config');
+$controllerPath = Registry::get('controllerPath');
+$controllerName = Registry::get('controllerName');
+$viewData = isset($this->viewData) ? $this->viewData : array();
+
+$viewAction = isset($this->viewAction) ? $this->viewAction : "";
+$viewAction = strtolower($viewAction);
+
+$viewAlert = isset($this->viewAlert) ? $this->viewAlert : "";
+$viewSuccess = isset($this->viewSuccess) ? $this->viewSuccess : "";
+
+$viewPostId = isset($this->viewPostId) ? $this->viewPostId : 0;
+$viewId = isset($this->viewId) ? $this->viewId : 0;
+
+$viewDataInput = isset($this->viewDataInput) ? $this->viewDataInput : array();
+$viewDataUser = isset($this->viewDataUser) ? $this->viewDataUser : array();
+$viewDataPost = isset($this->viewDataPost) ? $this->viewDataPost : array();
+$viewDataMeta = isset($this->viewDataMeta) ? $this->viewDataMeta : array();
+$viewDataContent = isset($this->viewDataContent) ? $this->viewDataContent : '';
+
+$dataInput = null;
+$dataUser = null;
+$dataPost = null;
+$dataMeta = null;
+
+if ($viewDataUser) {
+    $dataUser = $helper->getArrayValue($viewDataUser, 'data');
+}
+if ($viewDataInput) {
+    $dataInput = $helper->getArrayValue($viewDataInput, 'data');
+}
+if ($viewDataMeta) {
+    $dataMeta = $helper->getArrayValue($viewDataMeta, 'data');
+}
+
+$todayYear = date("Y");
+$todayMonth = date("m");
+
+$dataMonthRomawi = null;
+$dataYear = null;
+$dataMonth = null;
+$dataDate = null;
+$dataDays = null;
+for ($i = 0; $i <= 10; $i++){
+    $dataYear[] = array("id" => $todayYear - $i, "name" => $todayYear - $i);
+}
+for ($i = 1; $i <= 31; $i++){
+    $dataDate[] = array("id" => $i, "name" => $i);
+}
+$days = array('Ahad', 'Senin', 'Selasa', 'Rabu','Kamis','Jumat', 'Sabtu');
+$months = array("Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+);
+for ($i = 1; $i <= 12; $i++){
+    $dataMonthRomawi[] = array("id" => $i, "name" => $helper->romawi($i));
+}
+for ($i = 0; $i <= 11; $i++){
+    $dataMonth[] = array("id" => $i + 1, "name" => $months[$i]);
+}
+for ($i = 0; $i <= 6; $i++){
+    $dataDays[] = array("id" => $i, "name" => $days[$i]);
+}
+
+$printURL = "";
+$printURLUnsign = "";
+
+if ($viewData) {
+    $letterCode = $helper->getArrayValue($viewData, "code");
+    $printURL = $baseUrl . "cetak/post/$letterCode";
+    $printURLUnsign = $baseUrl . "cetak/post/$letterCode/unsign";
+}
+?>
+<div class="row">
+    <?php if ($viewSuccess) { ?>
+        <div class="col-md-12">
+            <div class="alert alert-success alert-dismissible bg-success text-white border-0 fade show" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <?php echo $viewSuccess ?>
+            </div>
+        </div>
+    <?php } ?>
+    <?php if ($viewAlert) { ?>
+        <div class="col-md-12">
+            <div class="alert alert-danger alert-dismissible bg-danger text-white border-0 fade show" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <?php echo $viewAlert ?>
+            </div>
+        </div>
+    <?php } ?>
+    <div class="col-md-12">
+        <form role="form" id="form-edit" method="post">
+            <input value="<?php echo $viewId ?>" type="hidden" id="edit-id" name="edit-id" />
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <?php
+                        $allInput = array();
+                        if ($dataMeta) {
+                            foreach ($dataMeta as $item) {
+                                $item["title"] = $item["name"];
+                                $item["source"] = "";
+                                $itemType = $item["type"];
+                                $itemSlug = $item["slug"];
+                                if (in_array($itemType, array('select', 'multi-select'))){
+                                    $item["source"] = "meta#$itemSlug";
+                                }
+                                $allInput[] = array('input' => $item);
+                            }
+                        }
+                        if ($dataInput) {
+                            foreach ($dataInput as $item) {
+                                $allInput[] = $item;
+                            }
+                        }
+                        if ($allInput) {
+                            $inputData = $viewData;
+                            foreach ($allInput as $item) {
+                                $input = $helper->getArrayValue($item, 'input');
+                                $inputParentIds = $helper->getArrayValue($item, 'parent-ids');
+                                $inputParentTitles = $helper->getArrayValue($item, 'parent-titles');
+                                $inputParentSlugs = $helper->getArrayValue($item, 'parent-slugs');
+                                $inputParentTypes = $helper->getArrayValue($item, 'parent-types');
+                                $inputParentSources = $helper->getArrayValue($item, 'parent-sources');
+                                $inputParentFormats = $helper->getArrayValue($item, 'parent-formats');
+
+                                if ($input) {
+                                    $inputTitle = $helper->getArrayValue($input, 'title');
+                                    $inputSlug = $helper->getArrayValue($input, 'slug');
+                                    $inputType = $helper->getArrayValue($input, 'type');
+                                    $inputSource = $helper->getArrayValue($input, 'source');
+                                    $inputFormat = $helper->getArrayValue($input, 'format');
+                                    if ($inputTitle) {
+                                        ?>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="edit-<?php echo $inputSlug ?>" class="col-form-label"><?php echo $inputTitle ?></label>
+                                                <div class="input-group">
+                                                <?php
+                                                $helper->renderInput($inputTitle, $inputSlug, $inputType, $inputFormat, $inputSource, $inputData,
+                                                    $dataUser, $dataYear, $dataMonth, $dataDate, $dataDays
+                                                );
+                                                if ($inputParentIds) {
+                                                    $arrInputParentIds = explode("***", $inputParentIds);
+                                                    $arrInputParentSlugs = explode("***", $inputParentSlugs);
+                                                    $arrInputParentTitles = explode("***", $inputParentTitles);
+                                                    $arrInputParentTypes = explode("***", $inputParentTypes);
+                                                    $arrInputParentSources = explode("***", $inputParentSources);
+                                                    $arrInputParentFormats = explode("***", $inputParentFormats);
+                                                    for ($p = 0; $p < count($arrInputParentIds); $p++) {
+                                                        $inputChildId = $helper->getArrayValue($arrInputParentIds, $p);
+                                                        $inputChildSlug = $helper->getArrayValue($arrInputParentSlugs, $p);
+                                                        $inputChildTitle = $helper->getArrayValue($arrInputParentTitles, $p);
+                                                        $inputChildType = $helper->getArrayValue($arrInputParentTypes, $p);
+                                                        $inputChildSource = $helper->getArrayValue($arrInputParentSources, $p);
+                                                        $inputChildFormat = $helper->getArrayValue($arrInputParentFormats, $p);
+
+                                                        $helper->renderInput($inputChildTitle, $inputChildSlug, $inputChildType,
+                                                            $inputChildFormat, $inputChildSource, $inputData, $dataUser, $dataYear, $dataMonth,
+                                                            $dataDate, $dataDays
+                                                        );
+                                                    }
+                                                }
+                                                ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <?php
+                                    }
+                                }
+                                ?>
+                                <?php
+                            }
+                        }
+                        ?>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="edit-editor" class="col-form-label">Pratinjau</label>
+                                <embed id="edit-editor" src="<?php echo $printURL ?>" width="100%" height="360">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer justify-content-between">
+                    <div class="dropdown float-left btn-group dropup">
+                        <button type="button" class="btn btn-print btn-dark dropdown-toggle" id="dropdownPrint"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-print"></i>
+                            Cetak
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownPrint">
+                            <a class="dropdown-item" target="_blank" href="<?php echo $printURL ?>">Dengan Tanda Tangan</a>
+                            <a class="dropdown-item" target="_blank" href="<?php echo $printURLUnsign ?>">Tanpa Tanda Tangan</a>
+                        </div>
+                    </div>
+                    <button type="submit" name="action" class="btn btn-success float-right" value="edit">
+                        <i class="fas fa-save"></i>&nbsp;&nbsp;Simpan
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,82 @@
+[
+    {
+        "name": "asset",
+        "path": "asset",
+        "title": "Asset"
+    },
+    {
+        "name": "plugin",
+        "path": "plugin",
+        "title": "Plugin"
+    },
+    {
+        "name": "image",
+        "path": "image",
+        "title": "Image"
+    },
+    {
+        "name": "script",
+        "path": "script",
+        "title": "Script"
+    },
+    {
+        "name": "api",
+        "path": "api",
+        "title": "API"
+    },
+    {
+        "name": "gallery",
+        "path": "galeri",
+        "title": "Galeri"
+    },
+    {
+        "name": "index",
+        "path": "index",
+        "title": "Beranda"
+    },
+    {
+        "name": "dashboard",
+        "path": "dasbor",
+        "title": "Dasbor"
+    },
+    {
+        "name": "user",
+        "path": "pengguna",
+        "title": "Pengguna"
+    },
+    {
+        "name": "cms",
+        "path": "cms",
+        "title": "Pengguna"
+    },
+    {
+        "name": "letter",
+        "path": "surat",
+        "title": "Surat"
+    },
+    {
+        "name": "download",
+        "path": "unduh",
+        "title": "Unduh"
+    },
+    {
+        "name": "print",
+        "path": "cetak",
+        "title": "Cetak"
+    },
+    {
+        "name": "install",
+        "path": "pasang",
+        "title": "Pemasangan"
+    },
+    {
+        "name": "login",
+        "path": "masuk",
+        "title": "Masuk"
+    },
+    {
+        "name": "logout",
+        "path": "keluar",
+        "title": "Masuk"
+    }
+]

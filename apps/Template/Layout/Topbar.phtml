@@ -1,0 +1,120 @@
+<?php
+
+use NG\Registry;
+use NG\Session;
+use NG\Uri;
+$session = new Session();
+$helper = new Helper();
+$baseUrl = Uri::baseUrl();
+$config = Registry::get('config');
+$userSession = null;
+$currSession = $session->get("Login");
+$rolesUserLogin = null;
+$idUserLogin = 0;
+$nameUserLogin = '';
+
+$siteTitle = $config['SITE_TITLE'];
+
+if ($currSession) {
+    $userSession = $helper->getArrayValue($currSession, 'user');
+    $nameUserLogin = $userSession["name"];
+}
+$imageSrc = $baseUrl .  "asset/img/user.png";
+if ($userSession) {
+    $code = $helper->getArrayValue($userSession, "code");
+    $image = $helper->getArrayValue($userSession, "image");
+    $imageSrc = $baseUrl . "image/profile/" . strtolower($code) . "/$image";
+}
+// echo base64_encode($siteTitle);
+?>
+
+<!-- ============================================================== -->
+<!-- Topbar header - style you can find in pages.scss -->
+<!-- ============================================================== -->
+<header class="topbar" data-navbarbg="skin6">
+    <nav class="navbar top-navbar navbar-expand-md">
+        <div class="navbar-header" data-logobg="skin6">
+            <!-- This is for the sidebar toggle which is visible on mobile only -->
+            <a class="nav-toggler waves-effect waves-light d-block d-md-none" href="javascript:void(0)"><i
+                    class="ti-menu ti-close"></i></a>
+            <!-- ============================================================== -->
+            <!-- Logo -->
+            <!-- ============================================================== -->
+            <div class="navbar-brand">
+                <!-- Logo icon -->
+                <a href="<?php echo $baseUrl ?>dasbor">
+                    <b class="logo-icon">
+                        <!-- Dark Logo icon -->
+                        <img style="max-width: 48px" src="<?php echo $baseUrl ?>asset/img/dark-logo.png" alt="homepage" class="dark-logo" />
+                        <!-- Light Logo icon -->
+                        <img style="max-width: 48px" src="<?php echo $baseUrl ?>asset/img/light-logo.png" alt="homepage" class="light-logo" />
+                    </b>
+                    <!--End Logo icon -->
+                    <!-- Logo text -->
+                    <span class="logo-text">
+                                <!-- dark Logo text -->
+                                <img style="max-width: 160px" src="<?php echo $baseUrl . "image/text-logo/dark/" . base64_encode($siteTitle) ?>" alt="homepage" class="dark-logo img-fluid" />
+                        <!-- Light Logo text -->
+                                <img style="max-width: 160px" src="<?php echo $baseUrl . "image/text-logo/light/" . base64_encode($siteTitle) ?>" class="light-logo img-fluid" alt="homepage" />
+                            </span>
+                </a>
+            </div>
+            <!-- ============================================================== -->
+            <!-- End Logo -->
+            <!-- ============================================================== -->
+            <!-- ============================================================== -->
+            <!-- Toggle which is visible on mobile only -->
+            <!-- ============================================================== -->
+            <a class="topbartoggler d-block d-md-none waves-effect waves-light" href="javascript:void(0)"
+               data-toggle="collapse" data-target="#navbarSupportedContent"
+               aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><i
+                    class="ti-more"></i>
+            </a>
+        </div>
+        <!-- ============================================================== -->
+        <!-- End Logo -->
+        <!-- ============================================================== -->
+        <div class="navbar-collapse collapse" id="navbarSupportedContent">
+            <!-- ============================================================== -->
+            <!-- toggle and nav items -->
+            <!-- ============================================================== -->
+
+            <ul class="navbar-nav float-left mr-auto ml-3 pl-1">
+
+            </ul>
+
+            <!-- ============================================================== -->
+            <!-- Right side toggle and nav items -->
+            <!-- ============================================================== -->
+            <ul class="navbar-nav float-right">
+                <!-- ============================================================== -->
+                <!-- User profile and search -->
+                <!-- ============================================================== -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="javascript:void(0)" data-toggle="dropdown"
+                       aria-haspopup="true" aria-expanded="false">
+                        <img src="<?php echo $imageSrc ?>" alt="user" class="rounded-circle img-fluid"
+                             width="40" height="40" style="max-width: 40px; max-height: 40px">
+                        <span class="ml-2 d-none d-lg-inline-block">
+                            <span class="text-dark"><?php echo $nameUserLogin ?></span>
+                            <i data-feather="chevron-down" class="svg-icon"></i>
+                        </span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right user-dd animated flipInY">
+                        <a class="dropdown-item" href="<?php echo $baseUrl ?>pengguna/profil">
+                            <i data-feather="user" class="svg-icon mr-2 ml-1"></i>Profil</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="<?php echo $baseUrl ?>keluar">
+                            <i data-feather="power" class="svg-icon mr-2 ml-1"></i>Keluar</a>
+                    </div>
+                </li>
+                <!-- ============================================================== -->
+                <!-- User profile and search -->
+                <!-- ============================================================== -->
+            </ul>
+        </div>
+    </nav>
+</header>
+<!-- ============================================================== -->
+<!-- End Topbar header -->
+<!-- ============================================================== -->

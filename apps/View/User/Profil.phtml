@@ -1,0 +1,434 @@
+<?php
+
+use NG\Registry;
+use NG\Uri;
+$helper = $this->helper;
+$baseUrl = Uri::baseUrl();
+$config = Registry::get('config');
+$controllerPath = Registry::get('controllerPath');
+$controllerName = Registry::get('controllerName');
+$viewData = isset($this->viewData) ? $this->viewData : array();
+$viewDataMeta = isset($this->viewDataMeta) ? $this->viewDataMeta : array();
+
+$viewAction = isset($this->viewAction) ? $this->viewAction : "";
+
+$viewAlert = isset($this->viewAlert) ? $this->viewAlert : "";
+$viewSuccess = isset($this->viewSuccess) ? $this->viewSuccess : "";
+
+$userImage = $baseUrl .  "assets/img/user.png";
+$idUser = 0;
+if ($viewData){
+    if (is_array($viewData)){
+        $rolesUser = $helper->getArrayValue($viewData, "roles");
+        $codeUser = $helper->getArrayValue($viewData, "code");
+        $imageUser = $helper->getArrayValue($viewData, "image");
+        $fileImage = ROOT . DS . UPLOADS . DS . PROFILE . DS . strtolower($codeUser) . DS . $imageUser;
+
+        if (file_exists($fileImage)){
+            if (is_file($fileImage)){
+                $userImage = $baseUrl . "image/profile/" . strtolower($codeUser) . "/$imageUser";
+            }
+        }
+
+        $idUser = $helper->getArrayValue($viewData, "id");
+    }
+}
+
+?>
+<div class="row">
+    <?php if ($viewSuccess) { ?>
+        <div class="col-md-12">
+            <div class="alert alert-success alert-dismissible bg-success text-white border-0 fade show" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <?php echo $viewSuccess ?>
+            </div>
+        </div>
+    <?php } ?>
+    <?php if ($viewAlert) { ?>
+        <div class="col-md-12">
+            <div class="alert alert-danger alert-dismissible bg-danger text-white border-0 fade show" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <?php echo $viewAlert ?>
+            </div>
+        </div>
+    <?php } ?>
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body box-profile">
+                <form role="form" method="post" enctype="multipart/form-data">
+                    <div class="form-group row">
+                        <div class="col-md-12">
+                            <div class="text-center">
+                                <img width="160" height="160" style="max-width: 160px; max-height: 160px" id="img-profile" class="rounded-circle img-fluid" src="<?php echo $userImage ?>">
+                                <input accept=".jpg,.jpeg,.png" type="file" id="file" name="file" style="display:none"/>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <hr>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="name" class="col-form-label">Nama Lengkap</label>
+                                <input type="text" class="form-control" id="name" name="name" value="<?php echo $viewData["name"] ?>" placeholder="Nama Lengkap" required  />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="email" class="col-form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" value="<?php echo $viewData["email"] ?>" placeholder="Email" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="password" class="col-form-label">Kata Sandi (Lama)</label>
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Kata Sandi">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="new-password" class="col-form-label">Kata Sandi (Baru)</label>
+                                <input type="password" class="form-control" id="new-password" name="new-password" placeholder="Konfirmasi Kata Sandi">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="confirm" class="col-form-label">Konfirmasi Kata Sandi (Baru)</label>
+                                <input type="password" class="form-control" id="confirm" name="confirm" placeholder="Konfirmasi Kata Sandi">
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <hr>
+                        </div>
+                        <?php if ($viewDataMeta){
+                            $clsMetaData = new MetaData();
+                            $dataMeta = $helper->getArrayValue($viewDataMeta, "data");
+                            if ($dataMeta) {
+                                ?>
+                                <div class="col-md-12">
+                                    <div class="row">
+                                        <?php
+                                        $allInput = array();
+                                        if ($dataMeta) {
+                                            foreach ($dataMeta as $item) {
+                                                $item["title"] = $item["name"];
+                                                $item["source"] = "";
+                                                $allInput[] = array('input' => $item);
+                                            }
+                                        }
+                                        if ($allInput) {
+                                            foreach ($allInput as $item) {
+                                                $input = $helper->getArrayValue($item, 'input');
+                                                if ($input) {
+                                                    $inputId = $helper->getArrayValue($input, 'id');
+                                                    $inputTitle = $helper->getArrayValue($input, 'title');
+                                                    $inputSlug = $helper->getArrayValue($input, 'slug');
+                                                    $inputType = $helper->getArrayValue($input, 'type');
+                                                    $inputSource = $helper->getArrayValue($input, 'source');
+                                                    $clsDetail = new Detail();
+                                                    $inputDetail = $clsDetail->getByTargetAndMeta("user", $idUser, $inputSlug);
+                                                    $inputValue = $helper->getArrayValue($inputDetail, "value");
+                                                    if ($inputTitle) {
+                                                        ?>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="edit-<?php echo $inputSlug ?>" class="col-form-label"><?php echo $inputTitle ?></label>
+                                                                <?php
+                                                                switch ($inputType) {
+                                                                    case "text":
+                                                                        ?>
+                                                                        <input type="text" class="form-control" id="edit-<?php echo $inputSlug ?>"
+                                                                               name="meta[<?php echo $inputSlug ?>]" placeholder="<?php echo $inputTitle ?>"
+                                                                               value="<?php echo $inputValue; ?>">
+                                                                        <?php
+                                                                        break;
+                                                                    case "number":
+                                                                        ?>
+                                                                        <input type="number" min="0" class="form-control" id="edit-<?php echo $inputSlug ?>"
+                                                                               name="meta[<?php echo $inputSlug ?>]" placeholder="<?php echo $inputTitle ?>"
+                                                                               value="<?php echo $inputValue; ?>">
+                                                                        <?php
+                                                                        break;
+                                                                    case "date":
+                                                                        ?>
+                                                                        <div class="today-date input-group date" id="edit-<?php echo $inputSlug ?>"
+                                                                             data-target-input="nearest">
+                                                                            <input type="text" class="form-control datetimepicker-input"
+                                                                                   data-target="#edit-<?php echo $inputSlug ?>" name="meta[<?php echo $inputSlug ?>]"
+                                                                                   value="<?php echo $inputValue; ?>" >
+                                                                            <div class="input-group-append" data-target="#edit-<?php echo $inputSlug ?>"
+                                                                                 data-toggle="datetimepicker">
+                                                                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <?php
+                                                                        break;
+                                                                    case "time":
+                                                                        ?>
+                                                                        <div class="today-time input-group date" id="edit-<?php echo $inputSlug ?>"
+                                                                             data-target-input="nearest">
+                                                                            <input type="text" class="form-control datetimepicker-input"
+                                                                                   data-target="#edit-<?php echo $inputSlug ?>" name="meta[<?php echo $inputSlug ?>]"
+                                                                                   value="<?php echo $inputValue; ?>" >
+                                                                            <div class="input-group-append" data-target="#edit-<?php echo $inputSlug ?>"
+                                                                                 data-toggle="datetimepicker">
+                                                                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <?php
+                                                                        break;
+                                                                    case "datetime":
+                                                                        ?>
+                                                                        <div class="today-datetime input-group date" id="edit-<?php echo $inputSlug ?>"
+                                                                             data-target-input="nearest">
+                                                                            <input type="text" class="form-control datetimepicker-input"
+                                                                                   data-target="#edit-<?php echo $inputSlug ?>" name="meta[<?php echo $inputSlug ?>]"
+                                                                                   value="<?php echo $inputValue; ?>" >
+                                                                            <div class="input-group-append" data-target="#edit-<?php echo $inputSlug ?>"
+                                                                                 data-toggle="datetimepicker">
+                                                                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <?php
+                                                                        break;
+                                                                    case "select":
+                                                                        $clsMeta = new Meta();
+                                                                        $clsMetaData = new MetaData();
+                                                                        $selectList = null;
+                                                                        $metaId = $inputId;
+                                                                        $dataMetaChildren = null;
+                                                                        $dataMetaChildren = $clsMeta->fetchChildren($metaId, 0);
+                                                                        $dataChildren = null;
+                                                                        if ($dataMetaChildren) {
+                                                                            $dataChildren = $helper->getArrayValue($dataMetaChildren, 'data');
+                                                                        }
+                                                                        if ($dataChildren) {
+                                                                            $metaData = $clsMetaData->fetchByIdParent($metaId);
+                                                                            if ($metaData) {
+                                                                                $dataMeta = $helper->getArrayValue($metaData, 'data');
+                                                                                if ($dataMeta) {
+                                                                                    $itemList = array();
+                                                                                    $newIdMeta = 0;
+                                                                                    foreach ($dataMeta as $itemMeta) {
+                                                                                        $item = array();
+                                                                                        foreach ($itemMeta as $num => $itemSubMeta) {
+                                                                                            $item = $itemSubMeta[0];
+                                                                                            $item["name"] = $item["value"];
+                                                                                            $oldId = $item["id"];
+                                                                                            $item["id"] = $item["num"] . "#" . $item["idparent"];
+                                                                                            unset ($item["value"]);
+                                                                                            unset ($item["idparent"]);
+                                                                                            unset ($item["num"]);
+                                                                                            unset ($item["idmeta"]);
+                                                                                            $item["selected"] = "";
+                                                                                        }
+                                                                                        $selectList[] = $item;
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        } else {
+                                                                            $metaData = $clsMetaData->fetchByIdMeta($metaId, 0);
+                                                                            if ($metaData) {
+                                                                                $dataMeta = $helper->getArrayValue($metaData, 'data');
+                                                                                if ($dataMeta) {
+                                                                                    $itemList = array();
+                                                                                    $newIdMeta = 0;
+                                                                                    foreach ($dataMeta as $itemMeta) {
+                                                                                        $itemMeta["name"] = $itemMeta["value"];
+                                                                                        // $itemMeta["id"] = $itemMeta["idmeta"] . "#" . $itemMeta["num"];
+                                                                                        unset ($itemMeta["value"]);
+                                                                                        unset ($itemMeta["num"]);
+                                                                                        unset ($itemMeta["idmeta"]);
+                                                                                        $itemMeta["selected"] = "";
+                                                                                        $selectList[] = $itemMeta;
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                        $rawSelectedIds = $inputValue;
+                                                                        ?>
+                                                                        <select class="form-control select2bs4" id="edit-<?php echo $inputSlug ?>" name="meta[<?php echo $inputSlug ?>]">
+                                                                            <option value="">Tidak Ada</option>
+                                                                            <?php
+                                                                            if ($selectList) {
+                                                                                $selectedIds = null;
+                                                                                if ($rawSelectedIds) {
+                                                                                    preg_match_all("^\[(.*?)]^", $rawSelectedIds, $matches);
+                                                                                    if (count($matches) > 1){
+                                                                                        $selectedVal = $matches[1][0];
+                                                                                        if ($selectedVal) {
+                                                                                            $selectedIds = explode(',', $selectedVal);
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                                foreach ($selectList as $itemList) {
+                                                                                    $selected = "";
+                                                                                    $idItem = "meta#$inputSlug:" . $itemList["id"];
+                                                                                    $nameItem = $itemList["name"];
+                                                                                    $itemValue = "[$idItem]";
+                                                                                    $selected = "";
+                                                                                    if ($selectList == $dataYear) {
+                                                                                        $itemValue = $itemList["id"];
+                                                                                    }
+                                                                                    if ($selectedIds) {
+                                                                                        foreach ($selectedIds as $selectedId) {
+                                                                                            $selected = "";
+                                                                                            if ($selectedId == $idItem) {
+                                                                                                $selected = "selected";
+                                                                                                break;
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                    ?>
+                                                                                    <option value="<?php echo $itemValue ?>" <?php echo $selected ?>><?php echo $nameItem ?></option>
+                                                                                    <?php
+                                                                                }
+                                                                            }
+                                                                            ?>
+                                                                        </select>
+                                                                        <?php
+                                                                        break;
+                                                                    case "multi-select":
+                                                                        $clsMeta = new Meta();
+                                                                        $clsMetaData = new MetaData();
+                                                                        $selectList = null;
+                                                                        $metaId = $inputId;
+                                                                        $rawSelectedIds = $inputValue;
+                                                                        $selectedIds = null;
+                                                                        if ($rawSelectedIds) {
+                                                                            preg_match_all("^\[(.*?)]^", $rawSelectedIds, $matches);
+                                                                            if (count($matches) > 1){
+                                                                                $selectedVal = $matches[1][0];
+                                                                                if ($selectedVal) {
+                                                                                    $selectedIds = explode(',', $selectedVal);
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                        $metaId = $inputId;
+                                                                        $dataMetaChildren = null;
+                                                                        $dataMetaChildren = $clsMeta->fetchChildren($metaId, 0);
+                                                                        $dataChildren = null;
+                                                                        if ($dataMetaChildren) {
+                                                                            $dataChildren = $helper->getArrayValue($dataMetaChildren, 'data');
+                                                                        }
+                                                                        if ($dataChildren) {
+                                                                            $metaData = $clsMetaData->fetchByIdParent($metaId);
+                                                                            if ($metaData) {
+                                                                                $dataMeta = $helper->getArrayValue($metaData, 'data');
+                                                                                if ($dataMeta) {
+                                                                                    $itemList = array();
+                                                                                    $newIdMeta = 0;
+                                                                                    foreach ($dataMeta as $itemMeta) {
+                                                                                        $item = array();
+                                                                                        foreach ($itemMeta as $num => $itemSubMeta) {
+                                                                                            $item = $itemSubMeta[0];
+                                                                                            $item["name"] = $item["value"];
+                                                                                            $oldId = $item["id"];
+                                                                                            $item["id"] = $item["num"] . "#" . $item["idparent"];
+                                                                                            unset ($item["value"]);
+                                                                                            unset ($item["idparent"]);
+                                                                                            unset ($item["num"]);
+                                                                                            unset ($item["idmeta"]);
+                                                                                            $item["selected"] = "";
+                                                                                        }
+                                                                                        $selectList[] = $item;
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        } else {
+                                                                            $metaData = $clsMetaData->fetchByIdMeta($metaId, 0);
+                                                                            if ($metaData) {
+                                                                                $dataMeta = $helper->getArrayValue($metaData, 'data');
+                                                                                if ($dataMeta) {
+                                                                                    $itemList = array();
+                                                                                    $newIdMeta = 0;
+                                                                                    foreach ($dataMeta as $itemMeta) {
+                                                                                        $itemMeta["name"] = $itemMeta["value"];
+                                                                                        unset ($itemMeta["value"]);
+                                                                                        unset ($itemMeta["num"]);
+                                                                                        unset ($itemMeta["idmeta"]);
+                                                                                        $itemMeta["selected"] = "";
+                                                                                        $selectList[] = $itemMeta;
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                        $newSelectedList = array();
+                                                                        if ($selectedIds) {
+                                                                            foreach ($selectList as $num => $itemList) {
+                                                                                $idItem = "meta#$inputSlug:" . $itemList["id"];
+                                                                                $nameItem = $itemList["name"];
+                                                                                $itemList["selected"] = "";
+                                                                                $itemList["index"] = $num + 999999;
+
+                                                                                foreach ($selectedIds as $index => $selectedId) {
+                                                                                    if ($selectedId == $idItem) {
+                                                                                        $itemList["selected"] = "selected";
+                                                                                        $itemList["index"] = ($index + 1);
+                                                                                    }
+                                                                                }
+                                                                                $newSelectedList[] = $itemList;
+                                                                            }
+                                                                            $index = array_column($newSelectedList, 'index');
+                                                                            array_multisort($index, SORT_ASC, $newSelectedList);
+                                                                        } else {
+                                                                            $newSelectedList = $selectList;
+                                                                        }
+                                                                        ?>
+                                                                        <select class="form-control select2bs4" id="edit-<?php echo $inputSlug ?>" name="meta[<?php echo $inputSlug ?>][]" multiple="multiple">
+                                                                            <?php
+                                                                            if ($selectList) {
+                                                                                foreach ($newSelectedList as $itemList) {
+                                                                                    $selected = $itemList["selected"];
+                                                                                    $idItem = "meta#$inputSlug:" . $itemList["id"];
+                                                                                    $nameItem = $itemList["name"];
+                                                                                    ?>
+                                                                                    <option value="<?php echo $idItem ?>" <?php echo $selected ?>><?php echo $nameItem ?></option>
+                                                                                    <?php
+                                                                                }
+                                                                            }
+                                                                            ?>
+                                                                        </select>
+                                                                        <?php
+                                                                        break;
+                                                                    case "textarea":
+                                                                        ?>
+                                                                        <textarea rows="2" class="form-control" id="edit-<?php echo $inputSlug ?>" name="meta[<?php echo $inputSlug ?>]"></textarea>
+                                                                        <?php
+                                                                        break;
+                                                                }
+                                                                ?>
+                                                            </div>
+                                                        </div>
+                                                        <?php
+                                                    }
+                                                }
+                                                ?>
+                                                <?php
+                                            }
+                                        }
+                                        ?>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <hr>
+                                </div>
+                            <?php }
+                        } ?>
+                        <div class="col-md-12">
+                            <div class="text-center">
+                                <button type="submit" name="action" class="btn btn-warning" value="edit">
+                                    <i class="fas fa-save"></i>&nbsp;&nbsp;Perbarui
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
