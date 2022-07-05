@@ -3,6 +3,6 @@ CREATE TABLE IF NOT EXISTS `detail` (
   `idtarget` int(11) NOT NULL,
   `target` varchar(20) NOT NULL,
   `key` varchar(100) NOT NULL,
-  `value` varchar(200),
+  `value` text,
   UNIQUE KEY `ref_detail_unique` (`idtarget`,`target`,`key`,`value`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

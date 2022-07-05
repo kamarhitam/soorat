@@ -790,7 +790,7 @@ class Render {
                                                     $newData = array($loopField => $loopFieldVal);
                                                     $curList = $text;
                                                     $curList = str_replace("#field", $loopField, $curList);
-                                                    $curList = $this->render($curList, $newData);
+                                                    $curList = $this->childRender($curList, $newData);
                                                     $addList .= $curList;
                                                 }
                                             } else {
@@ -798,7 +798,7 @@ class Render {
                                                 $newData = array($loopField => $loopFieldVal);
                                                 $curList = $text;
                                                 $curList = str_replace("#field", $loopField, $curList);
-                                                $curList = $this->render($curList, $newData);
+                                                $curList = $this->childRender($curList, $newData);
                                                 $addList .= $curList;
                                             }
                                         }
