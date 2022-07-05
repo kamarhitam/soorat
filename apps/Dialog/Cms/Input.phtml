@@ -6,10 +6,17 @@ $helper = $this->helper;
 $viewAlert = isset($this->viewAlert) ? $this->viewAlert : "";
 $viewSuccess = isset($this->viewSuccess) ? $this->viewSuccess : "";
 $viewData = isset($this->viewData) ? $this->viewData : array();
+$viewDataMeta = isset($this->viewDataMeta) ? $this->viewDataMeta : array();
+$viewDataPost = isset($this->viewDataPost) ? $this->viewDataPost : array();
 
 $dataInput = null;
 if ($viewData) {
     $dataInput = $helper->getArrayValue($viewData, 'data');
+}
+
+$dataPost = null;
+if ($viewDataPost) {
+    $dataPost = $helper->getArrayValue($viewDataPost, 'data');
 }
 
 $dataType = array(
@@ -40,15 +47,13 @@ $dataFormat = array(
     array("id" => "numeric", "name" => "Numeric"),
     array("id" => "ucase", "name" => "Huruf Besar"),
     array("id" => "lcase", "name" => "Huruf Kecil"),
-    array("id" => "00", "name" => "Penomoran: 01"),
-    array("id" => "000", "name" => "Penomoran: 001"),
-    array("id" => "0000", "name" => "Penomoran: 0001"),
     array("id" => "00000", "name" => "Penomoran: 00001"),
+    array("id" => "0000", "name" => "Penomoran: 0001"),
+    array("id" => "000", "name" => "Penomoran: 001"),
+    array("id" => "00", "name" => "Penomoran: 01"),
 );
 
 $dataMeta = null;
-$clsRefMeta = new Meta();
-$viewDataMeta = $clsRefMeta->fetchSelect(0);
 if ($viewDataMeta) {
     $dataMeta = $helper->getArrayValue($viewDataMeta, 'data');
 }
@@ -142,7 +147,16 @@ if ($viewDataMeta) {
                                     if ($dataMeta) {
                                         foreach ($dataMeta as $itemMeta){
                                             $idSource = "meta#" . $itemMeta["slug"];
-                                            $nameSource = $itemMeta["name"];
+                                            $nameSource = "Meta: " . $itemMeta["name"];
+                                            ?>
+                                            <option value="<?php echo $idSource ?>"><?php echo $nameSource ?></option>
+                                            <?php
+                                        }
+                                    }
+                                    if ($dataPost) {
+                                        foreach ($dataPost as $itemPost){
+                                            $idSource = "post#" . $itemPost["slug"];
+                                            $nameSource = "Post: " . $itemPost["title"];
                                             ?>
                                             <option value="<?php echo $idSource ?>"><?php echo $nameSource ?></option>
                                             <?php
@@ -254,7 +268,16 @@ if ($viewDataMeta) {
                                     if ($dataMeta) {
                                         foreach ($dataMeta as $itemMeta){
                                             $idSource = "meta#" . $itemMeta["slug"];
-                                            $nameSource = $itemMeta["name"];
+                                            $nameSource = "Meta: " . $itemMeta["name"];
+                                            ?>
+                                            <option value="<?php echo $idSource ?>"><?php echo $nameSource ?></option>
+                                            <?php
+                                        }
+                                    }
+                                    if ($dataPost) {
+                                        foreach ($dataPost as $itemPost){
+                                            $idSource = "post#" . $itemPost["slug"];
+                                            $nameSource = "Post: " . $itemPost["title"];
                                             ?>
                                             <option value="<?php echo $idSource ?>"><?php echo $nameSource ?></option>
                                             <?php

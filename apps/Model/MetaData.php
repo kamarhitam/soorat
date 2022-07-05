@@ -162,6 +162,25 @@ class MetaData
         );
     }
 
+    public function fetchBySlugMeta($slugMeta, $limit = 10, $page = 1)
+    {
+        $database = $this->database;
+        $queryMeta = new Query();
+
+        $queryMeta->select("id")
+            ->from("meta")
+            ->where("slug = ?", $slugMeta);
+        $dataMeta = $database->fetchRow($queryMeta);
+        $idMeta = 0;
+
+        if ($dataMeta) {
+            $idMeta = $dataMeta["id"];
+        }
+
+        if ($idMeta) return $this->fetchByIdMeta($idMeta, $limit, $page);
+        return null;
+    }
+
     public function set($idMeta, $value)
     {
         $database = $this->database;
@@ -348,7 +367,7 @@ class MetaData
         return $database->fetchRow($query);
     }
 
-    public function fetchByIds($ids)
+    public function fetchByIds($ids, $glue = ",")
     {
         $database = $this->database;
         $queryFetch = new Query();
@@ -366,7 +385,7 @@ class MetaData
                 $name = $row["value"];
                 $data[] = $name;
             }
-            $result = implode(", ", $data);
+            $result = implode($glue, $data);
         }
         return $result;
     }

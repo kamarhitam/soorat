@@ -350,7 +350,7 @@ class User
         return $database->fetchRow($query);
     }
 
-    public function fetchByIds($ids)
+    public function fetchByIds($ids, $glue = ",")
     {
         $database = $this->database;
         $queryFetch = new Query();
@@ -368,7 +368,7 @@ class User
                 $name = $row["name"];
                 $data[] = $name;
             }
-            $result = implode(", ", $data);
+            $result = implode($glue, $data);
         }
         return $result;
     }

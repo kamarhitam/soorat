@@ -561,6 +561,8 @@ class UserController extends NG\Controller {
                 $cls = new User();
                 $data = $cls->fetch(0);
 
+                // print_r($data);
+
                 $cls = new Meta();
                 $dataMeta = $cls->fetchFilter("user", "", 0);
                 break;

@@ -1,0 +1,81 @@
+<?php
+
+use NG\Registry;
+use NG\Uri;
+$helper = $this->helper;
+$baseUrl = Uri::baseUrl();
+$config = Registry::get('config');
+$controllerPath = Registry::get('controllerPath');
+$controllerName = Registry::get('controllerName');
+
+$viewError = isset($this->viewError) ? $this->viewError : "";
+$viewSuccess = isset($this->viewSuccess) ? $this->viewSuccess : "";
+$viewData = isset($this->viewData) ? $this->viewData : "";
+$viewAction = isset($this->viewAction) ? $this->viewAction : "";
+$viewFilterType = isset($this->viewFilterType) ? $this->viewFilterType : 0;
+$viewFilterTypeSlug = isset($this->viewFilterTypeSlug) ? $this->viewFilterTypeSlug : "";
+$viewFilterTypeName = isset($this->viewFilterTypeName) ? $this->viewFilterTypeName : "";
+
+$data = null;
+if ($viewData){
+    $data = $helper->getArrayValue($viewData, "data");
+    $total = $helper->getArrayValue($viewData, "total");
+}
+
+$listURL = $baseUrl . strtolower($controllerPath) . "/$viewFilterTypeSlug";
+?>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <?php
+                        if ($data){
+                            ?>
+                        <div class="row">
+                            <?php
+                            foreach ($data as $item){
+                                $id = $helper->getArrayValue($item, "id");
+                                $title = $helper->getArrayValue($item, "title");
+                                ?>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <table style="width: 100%">
+                                            <tr>
+                                                <td><label><?php echo $title ?></label></td>
+                                                <td width="70">
+                                                    <a title="Daftar" href="<?php echo "$listURL/$id" ?>" class="btn btn-sm btn-primary">
+                                                        <i class="fas fa-list-alt"></i>
+                                                    </a>
+                                                    <button title="Form" data-id="<?php echo $id ?>" class="btn btn-sm btn-light btn-item-form">
+                                                        <i class="fas fa-file"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                                <?php
+                            }
+                            ?>
+                        </div>
+                            <?php
+                        } else {
+                            ?>
+                            <div class="col-md-12">
+                                <div class="alert alert-danger bg-danger text-white border-0 fade show" role="alert">
+                                    Tidak ada daftar <?php echo strtolower($viewFilterTypeName) ?> untuk saat ini.
+                                </div>
+                            </div>
+                            <?php
+                        }
+                        ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

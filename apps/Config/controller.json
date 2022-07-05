@@ -55,6 +55,16 @@
         "title": "Surat"
     },
     {
+        "name": "form",
+        "path": "form",
+        "title": "Form"
+    },
+    {
+        "name": "data",
+        "path": "data",
+        "title": "Data"
+    },
+    {
         "name": "download",
         "path": "unduh",
         "title": "Unduh"

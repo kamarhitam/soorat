@@ -85,6 +85,11 @@ class CmsController extends NG\Controller {
         $success = "";
         $alert = "";
         $viewId = 0;
+        $filterType = 1;
+        $filterTypeSlug = '';
+
+        $filterTarget = 1;
+        $filterTargetSlug = '';
 
         $param1 = "";
         $param2 = "";
@@ -134,13 +139,6 @@ class CmsController extends NG\Controller {
             "title" => $helper->getTitle($this->menu, 'id', 'text', 410000),
         );
 
-        if ($requests) {
-            $breadcrumb[] = array(
-                "url" => $baseUrl . $controllerPath . "/$param1",
-                "title" => $title,
-            );
-        }
-
         if (isset($_POST["action"])) {
             $action = $_POST["action"];
             if ($action){
@@ -151,65 +149,82 @@ class CmsController extends NG\Controller {
                             switch ($param1){
                                 case "posting":
                                     if ($param2) {
-                                        switch ($param2) {
-                                            case "new":
-                                            case "baru":
-                                                $title = $_POST["add-title"];
-                                                $slug = $helper->getSlug($title);
+                                        $filterType = (int) $param2;
+                                        if ($param3) {
+                                            if ($filterType) {
+                                                switch ($param3) {
+                                                    case "new":
+                                                    case "baru":
+                                                        $title = $_POST["add-title"];
+                                                        $slug = $helper->getSlug($title);
 
-                                                $type = $_POST["add-type"];
-                                                $content = $_POST["add-editor"];
+                                                        $type = $filterType;
+                                                        $content = $_POST["add-editor"];
 
-                                                $date = date("Y-m-d H:i:s");
-                                                $dataInsert = array(
-                                                    "type" => $type,
-                                                    "date" => $date,
-                                                    "title" => $title,
-                                                    "slug" => $slug,
-                                                    "content" => $content,
-                                                );
+                                                        $date = date("Y-m-d H:i:s");
+                                                        $dataInsert = array(
+                                                            "type" => $type,
+                                                            "date" => $date,
+                                                            "title" => $title,
+                                                            "slug" => $slug,
+                                                            "content" => $content,
+                                                        );
 
-                                                $cls = new CmsPost();
-                                                $oldData = $cls->getSlugAlready($slug);
+                                                        $cls = new CmsPost();
+                                                        $oldData = $cls->getSlugAlready($slug);
 
-                                                if ($oldData){
-                                                    for ($i = 1; $i <= 1000; $i++){
-                                                        $oldData = $cls->getSlugAlready($slug . "-" . $i);
-                                                        if (!$oldData){
-                                                            $dataInsert["slug"] = $slug . "-" . $i;
-                                                            break;
-                                                        }
-                                                    }
-                                                }
-                                                $idPost = $cls->insert($dataInsert);
-                                                if ($idPost){
-                                                    $success = "Informasi berhasil disimpan";
-
-                                                    if (isset($_POST["meta"])){
-                                                        $meta = $_POST["meta"];
-                                                        $target = "posting";
-                                                        $clsDetail = new Detail();
-                                                        $clsDetail->deleteByTarget($target, $idPost);
-                                                        foreach ($meta as $keyMeta => $itemMeta) {
-                                                            if (is_array($itemMeta)) {
-                                                                foreach ($itemMeta as $valueMeta) {
-                                                                    $dataMetaInsert = array(
-                                                                        "idtarget" => $idPost,
-                                                                        "target" => $target,
-                                                                        "key" => $keyMeta,
-                                                                        "value" => $valueMeta
-                                                                    );
-                                                                    $clsDetail->insert($dataMetaInsert);
+                                                        if ($oldData){
+                                                            for ($i = 1; $i <= 1000; $i++){
+                                                                $oldData = $cls->getSlugAlready($slug . "-" . $i);
+                                                                if (!$oldData){
+                                                                    $dataInsert["slug"] = $slug . "-" . $i;
+                                                                    break;
                                                                 }
-                                                                $success = "Informasi berhasil disimpan";
-                                                                $alert = "";
                                                             }
                                                         }
-                                                    }
+                                                        $idPost = $cls->insert($dataInsert);
+                                                        if ($idPost){
+                                                            $success = "Informasi berhasil disimpan";
 
-                                                    Route::redirect($baseUrl . strtolower($controllerPath) . "/posting/edit/$idPost");
+                                                            if (isset($_POST["meta"])){
+                                                                $inputPost = $_POST["meta"];
+                                                                $details = null;
+                                                                foreach ($inputPost as $postKey => $postValue) {
+                                                                    $itemKey = $postKey;
+                                                                    $itemValue = $postValue;
+                                                                    if (is_array($postValue)) {
+                                                                        $itemValue = '[' . implode(',', $postValue) . ']';
+                                                                    }
+                                                                    if ($itemKey) {
+                                                                        if ($itemValue) {
+                                                                            $details[$itemKey] = $itemValue;
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                                if ($details) {
+                                                                    $clsDetail = new Detail();
+                                                                    $target = "posting";
+                                                                    $clsDetail->deleteByTarget($target, $idPost);
+                                                                    foreach ($details as $detailKey => $detailValue) {
+                                                                        $dataDetailInsert = array(
+                                                                            "idtarget" => $idPost,
+                                                                            "target" => $target,
+                                                                            "key" => $detailKey,
+                                                                            "value" => $detailValue
+                                                                        );
+                                                                        $clsDetail->insert($dataDetailInsert);
+                                                                    }
+                                                                    $success = "Informasi berhasil disimpan";
+                                                                    $alert = "";
+                                                                }
+                                                            }
+
+                                                            Route::redirect($baseUrl . strtolower($controllerPath) . "/posting/$filterType/edit/$idPost");
+                                                        }
+                                                        break;
                                                 }
-                                                break;
+                                            }
                                         }
                                     }
                                     break;
@@ -225,14 +240,25 @@ class CmsController extends NG\Controller {
                                     }
                                     break;
                                 case "input":
+                                    if ($param2) {
+                                        $filterTarget = (int)$param2;
+                                    } else {
+                                        $filterTarget = 1;
+                                    }
+
                                     $title = $_POST["add-title"];
                                     $type = $_POST["add-type"];
+
+                                    $cls = new CmsType();
+                                    $typePost = $cls->getById($filterTarget);
+                                    $filterTargetSlug = $typePost["slug"];
+
                                     $source = '';
                                     $format = '';
                                     $parent = 0;
-                                    $slug = $helper->getSlug($title);
+                                    $slug = "$filterTargetSlug-" . $helper->getSlug($title);
 
-                                    if (isset($_POST["edit-parent"])){
+                                    if (isset($_POST["add-parent"])){
                                         $parent = $_POST["add-parent"];
                                     }
 
@@ -251,6 +277,7 @@ class CmsController extends NG\Controller {
                                         "source"=> $source,
                                         "parent"=> $parent,
                                         "format"=> $format,
+                                        "target"=> $filterTargetSlug,
                                     );
 
                                     $clsInput = new CmsInput();
@@ -274,6 +301,22 @@ class CmsController extends NG\Controller {
                                         $alert = "Informasi gagal disimpan";
                                     }
                                     break;
+                                case "tipe":
+                                    $name = $_POST["add-name"];
+                                    $slug = $helper->getSlug($name);
+                                    $data = array(
+                                        "name"=> $name,
+                                        "slug"=> $slug,
+                                    );
+
+                                    $cls = new CmsType();
+                                    $insert = $cls->insert($data);
+                                    if ($insert){
+                                        $success = "Informasi berhasil disimpan";
+                                    } else {
+                                        $alert = "Informasi gagal disimpan";
+                                    }
+                                    break;
                             }
                         }
                         break;
@@ -282,64 +325,69 @@ class CmsController extends NG\Controller {
                         if ($helper->isHasRight($rolesUserLogin, $subMenu, $actionId)){
                             switch ($param1){
                                 case "posting":
-                                    $idPost = $_POST["edit-id"];
-                                    $title = $_POST["edit-title"];
-                                    $slug = $_POST["edit-slug"];
+                                    if ($param2) {
+                                        if ($param4) {
+                                            $filterType = (int) $param2;
+                                            $idPost = (int) $param4;
+                                            $title = $_POST["edit-title"];
+                                            $slug = $_POST["edit-slug"];
 
-                                    if (!$slug){
-                                        $slug =  $helper->getSlug($title);
-                                    }
-
-                                    $type = $_POST["edit-type"];
-                                    $content = $_POST["edit-editor"];
-
-                                    $dataUpdate = array(
-                                        "type" => $type,
-                                        "title" => $title,
-                                        "slug" => $slug,
-                                        "content" => $content,
-                                    );
-
-                                    $cls = new CmsPost();
-                                    $update = $cls->update($idPost, $dataUpdate);
-
-                                    if ($update){
-                                        $success = "Informasi berhasil diperbarui";
-                                    } else {
-                                        $alert = "Informasi gagal diperbarui";
-                                    }
-
-                                    if (isset($_POST["meta"])){
-                                        $inputPost = $_POST["meta"];
-                                        $details = null;
-                                        foreach ($inputPost as $postKey => $postValue) {
-                                            $itemKey = $postKey;
-                                            $itemValue = $postValue;
-                                            if (is_array($postValue)) {
-                                                $itemValue = '[' . implode(',', $postValue) . ']';
+                                            if (!$slug){
+                                                $slug =  $helper->getSlug($title);
                                             }
-                                            if ($itemKey) {
-                                                if ($itemValue) {
-                                                    $details[$itemKey] = $itemValue;
+
+                                            $type = $filterType;
+                                            $content = $_POST["edit-editor"];
+
+                                            $dataUpdate = array(
+                                                "type" => $type,
+                                                "title" => $title,
+                                                "slug" => $slug,
+                                                "content" => $content,
+                                            );
+
+                                            $cls = new CmsPost();
+                                            $update = $cls->update($idPost, $dataUpdate);
+
+                                            if ($update){
+                                                $success = "Informasi berhasil diperbarui";
+                                            } else {
+                                                $alert = "Informasi gagal diperbarui";
+                                            }
+
+                                            if (isset($_POST["meta"])){
+                                                $inputPost = $_POST["meta"];
+                                                $details = null;
+                                                foreach ($inputPost as $postKey => $postValue) {
+                                                    $itemKey = $postKey;
+                                                    $itemValue = $postValue;
+                                                    if (is_array($postValue)) {
+                                                        $itemValue = '[' . implode(',', $postValue) . ']';
+                                                    }
+                                                    if ($itemKey) {
+                                                        if ($itemValue) {
+                                                            $details[$itemKey] = $itemValue;
+                                                        }
+                                                    }
+                                                }
+
+                                                if ($details) {
+                                                    $clsDetail = new Detail();
+                                                    $target = "posting";
+                                                    $clsDetail->deleteByTarget($target, $idPost);
+                                                    foreach ($details as $detailKey => $detailValue) {
+                                                        $dataDetailInsert = array(
+                                                            "idtarget" => $idPost,
+                                                            "target" => $target,
+                                                            "key" => $detailKey,
+                                                            "value" => $detailValue
+                                                        );
+                                                        $clsDetail->insert($dataDetailInsert);
+                                                    }
+                                                    $success = "Informasi berhasil disimpan";
+                                                    $alert = "";
                                                 }
                                             }
-                                        }
-
-                                        if ($details) {
-                                            $clsDetail = new Detail();
-                                            $target = "posting";
-                                            $clsDetail->deleteByTarget($target, $idPost);
-                                            foreach ($details as $detailKey => $detailValue) {
-                                                $dataDetailInsert = array(
-                                                    "idtarget" => $idPost,
-                                                    "target" => $target,
-                                                    "key" => $detailKey,
-                                                    "value" => $detailValue
-                                                );
-                                                $clsDetail->insert($dataDetailInsert);
-                                            }
-                                            $success = "Informasi berhasil disimpan";
-                                            $alert = "";
                                         }
                                     }
                                     break;
@@ -347,8 +395,10 @@ class CmsController extends NG\Controller {
                                     $cls = new CmsGallery();
                                     $name = $_POST["edit-name"];
                                     $idGal = $_POST["edit-id"];
+                                    $tag = $_POST["edit-tag"];
                                     $dataUpdate = array(
                                         "name" => $name,
+                                        "tag" => $tag,
                                     );
                                     $update = $cls->update($idGal, $dataUpdate);
                                     if ($update){
@@ -365,6 +415,9 @@ class CmsController extends NG\Controller {
                                     $parent = 0;
                                     $source = '';
                                     $format = '';
+
+                                    $cls = new CmsType();
+                                    $typePost = $cls->getById($filterTarget);
 
                                     if (isset($_POST["edit-source"])){
                                         $source = $_POST["edit-source"];
@@ -413,6 +466,25 @@ class CmsController extends NG\Controller {
                                         $alert = "Informasi gagal disimpan";
                                     }
                                     break;
+                                case "tipe":
+                                    $id = $_POST["edit-id"];
+                                    $name = $_POST["edit-name"];
+                                    $slug = $_POST["edit-slug"];
+
+                                    $dataUpdate = array(
+                                        "name"=> $name,
+                                        "slug"=> $slug,
+                                    );
+
+                                    $cls = new CmsType();
+                                    $update = $cls->update($id, $dataUpdate);
+
+                                    if ($update){
+                                        $success = "Informasi berhasil disimpan";
+                                    } else {
+                                        $alert = "Informasi gagal disimpan";
+                                    }
+                                    break;
                             }
                         }
                         break;
@@ -424,7 +496,6 @@ class CmsController extends NG\Controller {
                                     $id = $_POST["del-post-id"];
                                     $cls = new CmsPost();
                                     $del = $cls->delete($id);
-
                                     $success = "Data berhasil dihapus";
                                     break;
                                 case "galeri":
@@ -456,6 +527,18 @@ class CmsController extends NG\Controller {
                             }
                         }
                         break;
+                    case "filter":
+                        $redirect = "";
+                        if (isset($_POST["filter-type"])){
+                            $filterType = $_POST["filter-type"];
+                            $redirect = $baseUrl . strtolower($controllerPath) . "/$param1/$filterType";
+                        }
+                        if (isset($_POST["filter-target"])){
+                            $filterTarget = $_POST["filter-target"];
+                            $redirect = $baseUrl . strtolower($controllerPath) . "/$param1/$filterTarget";
+                        }
+                        Route::redirect($redirect);
+                        break;
                 }
             }
         }
@@ -465,39 +548,61 @@ class CmsController extends NG\Controller {
         $data = null;
         $dataAction = null;
         $dataMeta = null;
+        $dataPost = null;
+        $dataType = null;
+        $dataTarget = null;
 
         switch ($param1) {
             case "posting":
+                if ($param2) {
+                    $filterType = (int) $param2;
+                } else {
+                    $filterType = 1;
+                }
+
+                if ($requests) {
+                    $breadcrumb[] = array(
+                        "url" => $baseUrl . $controllerPath . "/$param1/$filterType",
+                        "title" => $title,
+                    );
+                }
+
+                $cls = new CmsType();
+                $dataType = $cls->fetch(0);
+                $typePost = $cls->getById($filterType);
+                $filterTypeSlug = $typePost["slug"];
+
                 $cls = new Meta();
-                $dataMeta = $cls->fetchFilter("posting", "", 0);
+                $dataMeta = $cls->fetchFilter("posting-" . $filterTypeSlug, "", 0);
 
                 $cls = new CmsPost();
-                if ($param2) {
-                    switch ($param2) {
+
+                if ($param3) {
+                    switch ($param3) {
                         case "new":
                         case "baru":
                             $action = "Baru";
-                            $subTitle = "Baru";
-                            $title = "Posting Baru";
+                            $subTitle = $typePost["name"] . " Baru";
+                            $title = "Posting " . $typePost["name"] . " Baru";
                             $breadcrumb[] = array(
-                                "url" => $baseUrl . "$controllerPath/$param1/$param2",
+                                "url" => $baseUrl . "$controllerPath/$param1/$filterType/$param3",
                                 "title" => $subTitle,
                             );
                             break;
                         case "edit":
-                            $viewId = (int) $param3;
+                            $viewId = (int) $param4;
                             if ($viewId) {
                                 $cls = new CmsPost();
                                 $data = $cls->getById($viewId);
                                 if ($data) {
                                     $action = "Edit";
-                                    $subTitle = "Edit";
-                                    $title = "Edit Posting";
+                                    $subTitle = "Edit " . $typePost["name"];
+                                    $title = "Edit Posting " . $typePost["name"];
 
                                     $postTitle = $helper->getArrayValue($data, 'title');
 
                                     $breadcrumb[] = array(
-                                        "url" => $baseUrl . "$controllerPath/$param1/$param2/$viewId",
+                                        "url" => $baseUrl . "$controllerPath/$param1/$filterType/$param3/$viewId",
                                         "title" => "$subTitle: $postTitle",
                                     );
                                 } else {
@@ -507,7 +612,7 @@ class CmsController extends NG\Controller {
                             break;
                     }
                 } else {
-                    $data = $cls->fetch(0);
+                    $data = $cls->fetchByType($filterTypeSlug, 0);
                 }
                 break;
             case "galeri":
@@ -515,7 +620,35 @@ class CmsController extends NG\Controller {
                 $data = $cls->fetch(0);
                 break;
             case "input":
+                if ($param2) {
+                    $filterTarget = (int) $param2;
+                } else {
+                    $filterTarget = 1;
+                }
+
+                $cls = new CmsType();
+                $dataTarget = $cls->fetch(0);
+                $typePost = $cls->getById($filterTarget);
+                if ($typePost) {
+                    $filterTargetSlug = $typePost["slug"];
+                }
+
+                $dataMeta = null;
+                $cls = new Meta();
+                $dataMeta = $cls->fetchSelect(0);
+
                 $cls = new CmsInput();
+                $data = $cls->fetch($filterTargetSlug, 0, 0);
+
+                $cls = new CmsPost();
+                if ($filterTargetSlug == "surat") {
+                    $dataPost = $cls->fetchByType("form", 0);
+                } else {
+                    $dataPost = $cls->fetchByType("surat", 0);
+                }
+                break;
+            case "tipe":
+                $cls = new CmsType();
                 $data = $cls->fetch(0);
                 break;
         }
@@ -526,7 +659,12 @@ class CmsController extends NG\Controller {
         $this->view->viewTitle = $title;
         $this->view->viewBreadcrumb = $breadcrumb;
         $this->view->viewDataAction = $dataAction;
+        $this->view->viewFilterType = $filterType;
+        $this->view->viewFilterTarget = $filterTarget;
         $this->view->viewDataMeta = $dataMeta;
+        $this->view->viewDataPost = $dataPost;
+        $this->view->viewDataType = $dataType;
+        $this->view->viewDataTarget = $dataTarget;
         $this->view->viewData = $data;
         $this->view->viewId = $viewId;
         $this->view->viewSuccess = $success;

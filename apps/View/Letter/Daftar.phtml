@@ -178,6 +178,7 @@ if ($viewFilterYear) {
                                                 $inputSlug = $helper->getArrayValue($input, 'slug');
                                                 $inputType = $helper->getArrayValue($input, 'type');
                                                 $inputSource = $helper->getArrayValue($input, 'source');
+
                                                 if ($inputTitle) {
                                                     ?>
                                                     <th><?php echo $inputTitle ?></th>
@@ -221,9 +222,11 @@ if ($viewFilterYear) {
                                                         <textarea style="display: none" class="item-data" data-id="<?php echo $id ?>">
                                                             <?php echo json_encode($item, true) ?>
                                                         </textarea>
+
                                                     <a title="Edit" href="<?php echo $baseUrl . "$controllerPath/$viewId/edit/$id" ?>" class="btn btn-sm btn-warning">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
+
                                                     <a target="_blank" title="Cetak" href="<?php echo $baseUrl . "cetak/post/$code" ?>" class="btn btn-sm btn-dark">
                                                         <i class="fas fa-print"></i>
                                                     </a>
@@ -256,11 +259,22 @@ if ($viewFilterYear) {
 
                                                     foreach ($allInput as $itemInput) {
                                                         $input = $helper->getArrayValue($itemInput, 'input');
+                                                        $parentIds = $helper->getArrayValue($itemInput, 'parent-ids');
+                                                        $parentTypes = $helper->getArrayValue($itemInput, 'parent-types');
+                                                        $parentSources = $helper->getArrayValue($itemInput, 'parent-sources');
+                                                        $parentFormats = $helper->getArrayValue($itemInput, 'parent-formats');
+                                                        $parentSlugs = $helper->getArrayValue($itemInput, 'parent-slugs');
+                                                        $itemValues = array();
+
+                                                        // print_r($item);
+                                                        // print_r($itemInput);
+
                                                         if ($input) {
                                                             $inputTitle = $helper->getArrayValue($input, 'title');
                                                             $inputSlug = $helper->getArrayValue($input, 'slug');
                                                             $inputType = $helper->getArrayValue($input, 'type');
                                                             $inputSource = $helper->getArrayValue($input, 'source');
+                                                            $inputFormat = $helper->getArrayValue($input, 'format');
                                                             $itemValue = $helper->getArrayValue($item, $inputSlug);
 
                                                             preg_match_all("^\[(.*?)]^", $itemValue, $matches);
@@ -292,6 +306,52 @@ if ($viewFilterYear) {
                                                                                                     if ($selectedIdKeyType == "meta") {
                                                                                                         $valSelectedId = implode(",", $selectedIdVals);
                                                                                                         $itemValue = $clsMetaData->fetchByIds($valSelectedId);
+                                                                                                    } else if ($selectedIdKeyType == "post") {
+                                                                                                        $clsPost = new CmsPost();
+                                                                                                        $clsType = new CmsType();
+                                                                                                        $post = $clsPost->getBySlug($selectedIdKeyMeta);
+                                                                                                        if ($post) {
+                                                                                                            $typePost = $this->getArrayValue($post, 'type');
+                                                                                                            $idPost = $this->getArrayValue($post, 'id');
+                                                                                                            if ($typePost) {
+                                                                                                                $cmsType = $clsType->getById($typePost);
+                                                                                                                if ($cmsType) {
+                                                                                                                    $typeSlug = $typePost = $this->getArrayValue($cmsType, 'slug');
+                                                                                                                    $clsLetter = null;
+                                                                                                                    switch ($typeSlug) {
+                                                                                                                        case "form":
+                                                                                                                            $clsLetter = new CmsForm();
+                                                                                                                            break;
+                                                                                                                        case "surat":
+                                                                                                                            $clsLetter = new Letter();
+                                                                                                                            break;
+                                                                                                                    }
+                                                                                                                    if ($clsLetter) {
+                                                                                                                        $dataLetterRaw = $clsLetter->fetchByPostId($idPost, 0, 0);
+                                                                                                                        if ($dataLetterRaw) {
+                                                                                                                            $dataLetter = $this->getArrayValue($dataLetterRaw, 'data');
+                                                                                                                            if ($dataLetter) {
+                                                                                                                                $selectList = array();
+                                                                                                                                foreach ($dataLetter as $itemLetter) {
+                                                                                                                                    $idLetter = $this->getArrayValue($itemLetter, 'id');
+                                                                                                                                    $detailKeys = $this->getArrayValue($itemLetter, 'detail-keys');
+                                                                                                                                    $detailValues = $this->getArrayValue($itemLetter, 'detail-values');
+                                                                                                                                    if ($detailKeys) {
+                                                                                                                                        $arrDetailValues = explode("***", $detailValues);
+                                                                                                                                        $id = $idLetter;
+                                                                                                                                        $name = $arrDetailValues[0];
+                                                                                                                                        $selectList[] = $name;
+                                                                                                                                    }
+                                                                                                                                }
+                                                                                                                                if ($selectList) {
+                                                                                                                                    $itemValue = implode(', ', $selectList);
+                                                                                                                                }
+                                                                                                                            }
+                                                                                                                        }
+                                                                                                                    }
+                                                                                                                }
+                                                                                                            }
+                                                                                                        }
                                                                                                     }
                                                                                                 } else {
                                                                                                     switch ($selectedIdKeyType) {
@@ -310,7 +370,81 @@ if ($viewFilterYear) {
                                                                     }
                                                                 }
                                                             }
+                                                            if ($inputFormat) {
+                                                                $format = $inputFormat;
+                                                                switch ($format) {
+                                                                    case "roman":
+                                                                        $itemValue = $helper->romawi($itemValue);
+                                                                        break;
+                                                                    case "spell":
+                                                                        $itemValue = $helper->terbilang($itemValue);
+                                                                        break;
+                                                                    case "ucase":
+                                                                        $itemValue = strtoupper($itemValue);
+                                                                        break;
+                                                                    case "lcase":
+                                                                        $itemValue = strtolower($itemValue);
+                                                                        break;
+                                                                    case "numeric":
+                                                                        $itemValue = number_format($itemValue, 0, ",", ".");
+                                                                        break;
+                                                                    default:
+                                                                        if (substr($format, 1, 1) == "0") {
+                                                                            $length = strlen($format);
+                                                                            $itemValue = sprintf("%0" . $length . "d", $itemValue);
+                                                                            $itemValue = trim($itemValue);
+                                                                        }
+                                                                        break;
+                                                                }
+                                                            }
+
+                                                            $itemValues[$inputSlug][] = $itemValue;
+
+                                                            if ($parentIds) {
+                                                                $arrParentIds = explode("***", $parentIds);
+                                                                $arrParentSlugs = explode("***", $parentSlugs);
+                                                                $arrParentFormats = explode("***", $parentFormats);
+                                                                if ($arrParentIds) {
+                                                                    for ($k = 0; $k < count($arrParentIds); $k++) {
+                                                                        $itemValue = $item[$arrParentSlugs[$k]];
+                                                                        $format = $arrParentFormats[$k];
+                                                                        if ($format) {
+                                                                            switch ($format) {
+                                                                                case "roman":
+                                                                                    $itemValue = $helper->romawi($itemValue);
+                                                                                    break;
+                                                                                case "spell":
+                                                                                    $itemValue = $helper->terbilang($itemValue);
+                                                                                    break;
+                                                                                case "ucase":
+                                                                                    $itemValue = strtoupper($itemValue);
+                                                                                    break;
+                                                                                case "lcase":
+                                                                                    $itemValue = strtolower($itemValue);
+                                                                                    break;
+                                                                                case "numeric":
+                                                                                    $itemValue = number_format($itemValue, 0, ",", ".");
+                                                                                    break;
+                                                                                default:
+                                                                                    if (substr($format, 1, 1) == "0") {
+                                                                                        $length = strlen($format);
+                                                                                        $itemValue = sprintf("%0" . $length . "d", $itemValue);
+                                                                                        $itemValue = trim($itemValue);
+                                                                                    }
+                                                                                    break;
+                                                                            }
+                                                                        }
+                                                                        $itemValues[$inputSlug][] = $itemValue;
+                                                                    }
+                                                                }
+                                                            }
+
                                                             if ($inputTitle) {
+                                                                if (count($itemValues[$inputSlug]) > 1) {
+                                                                    $itemValue = implode("/", $itemValues[$inputSlug]);
+                                                                } else {
+                                                                    $itemValue = $itemValues[$inputSlug][0];
+                                                                }
                                                                 ?>
                                                                 <td><?php echo $itemValue ?></td>
                                                                 <?php

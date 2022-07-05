@@ -286,10 +286,8 @@ class Constant
                 ->where("id = ?", $id)
                 ->andWhere("target = ?", $this->target);
             $result = $database->query($query);
-            echo $idMeta;
             if ($idMeta) {
                 $clsMetaData = new MetaData();
-                echo $idMeta;
                 $clsMetaData->set($idMeta, $value);
                 $result = $clsMetaData->get($idMeta);
             }

@@ -8,6 +8,10 @@ $config = Registry::get('config');
 $controllerPath = Registry::get('controllerPath');
 $controllerName = Registry::get('controllerName');
 $viewData = isset($this->viewData) ? $this->viewData : array();
+$viewDataMeta = isset($this->viewDataMeta) ? $this->viewDataMeta : array();
+$viewDataTarget = isset($this->viewDataTarget) ? $this->viewDataTarget : array();
+$viewDataPost = isset($this->viewDataPost) ? $this->viewDataPost : array();
+$viewFilterTarget = isset($this->viewFilterTarget) ? $this->viewFilterTarget : 0;
 
 $viewAction = isset($this->viewAction) ? $this->viewAction : "";
 
@@ -15,6 +19,14 @@ $viewAlert = isset($this->viewAlert) ? $this->viewAlert : "";
 $viewSuccess = isset($this->viewSuccess) ? $this->viewSuccess : "";
 
 $listURL = $baseUrl . strtolower($controllerPath) . "/" . strtolower($viewAction);
+
+$dataTarget = null;
+$dataMeta = null;
+$dataPost = null;
+
+if ($viewDataPost) {
+    $dataPost = $helper->getArrayValue($viewDataPost, 'data');
+}
 
 $dataType = array(
     array("id" => "text", "name" => "Teks Pendek"),
@@ -27,9 +39,11 @@ $dataType = array(
     array("id" => "datetime", "name" => "Tanggal dan Waktu"),
     array("id" => "auto-number", "name" => "Nomor Otomatis"),
 );
-$dataMeta = null;
-$clsRefMeta = new Meta();
-$viewDataMeta = $clsRefMeta->fetchSelect(0);
+
+if ($viewDataTarget) {
+    $dataTarget = $helper->getArrayValue($viewDataTarget, 'data');
+}
+
 if ($viewDataMeta) {
     $dataMeta = $helper->getArrayValue($viewDataMeta, 'data');
 }
@@ -49,27 +63,70 @@ $dataFormat = array(
     array("id" => "numeric", "name" => "Numerik"),
     array("id" => "ucase", "name" => "Huruf Besar"),
     array("id" => "lcase", "name" => "Huruf Kecil"),
-    array("id" => "00", "name" => "Penomoran: 01"),
-    array("id" => "000", "name" => "Penomoran: 001"),
-    array("id" => "0000", "name" => "Penomoran: 0001"),
     array("id" => "00000", "name" => "Penomoran: 00001"),
+    array("id" => "0000", "name" => "Penomoran: 0001"),
+    array("id" => "000", "name" => "Penomoran: 001"),
+    array("id" => "00", "name" => "Penomoran: 01"),
 );
 
 if ($dataMeta) {
-    foreach ($dataMeta as $itemType){
-        $idType = "meta#" . $itemType["slug"];
-        $nameType = $itemType["name"];
-        $dataSource[] = array("id" => $idType, "name" => $nameType);
+    foreach ($dataMeta as $itemMeta){
+        $idMeta = "meta#" . $itemMeta["slug"];
+        $nameMeta = $itemMeta["name"];
+        $dataSource[] = array("id" => $idMeta, "name" => "Meta: $nameMeta");
     }
 }
+if ($dataPost) {
+    foreach ($dataPost as $itemPost){
+        $idSource = "post#" . $itemPost["slug"];
+        $nameSource = "Post: " . $itemPost["title"];
+        $dataSource[] = array("id" => $idSource, "name" => $nameSource);
+    }
+}
+
 ?>
 <div class="row">
     <div class="col-md-12">
         <div class="card">
             <div class="card-body">
-                <button data-toggle="modal" data-target="#dialog-add" class="btn waves-effect waves-light btn-success">
-                    <i class="fas fa-plus-circle"></i>&nbsp; Tambah Data
-                </button>
+                <div class="form-inline">
+                    <div class="form-group">
+                        <button data-toggle="modal" data-target="#dialog-add" class="btn waves-effect waves-light btn-success">
+                            <i class="fas fa-plus-circle"></i>&nbsp; Tambah Data
+                        </button>
+                    </div>
+                    <form role="form" method="post" class="form-inline mx-sm-3">
+                        <div class="form-group mx-sm-3">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <label for="filter-type" class="input-group-text">Target</label>
+                                </div>
+                                <div class="input-group-append">
+                                    <select class="form-control select2bs4" id="filter-type" name="filter-target">
+                                        <?php
+                                        foreach ($dataTarget as $itemTarget){
+                                            $selected = "";
+                                            $idTarget = $itemTarget["id"];
+                                            $nameTarget = $itemTarget["name"];
+                                            if ($viewFilterTarget == $idTarget) $selected = "selected";
+                                            ?>
+                                            <option value="<?php echo $idTarget ?>" <?php echo $selected ?>><?php echo $nameTarget ?></option>
+                                            <?php
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group mx-sm-3">
+                            <div class="input-group">
+                                <button type="submit" name="action" class="btn btn-warning" value="filter">
+                                    <i class="fas fa-filter"></i>&nbsp; Tampilkan
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -176,11 +233,13 @@ if ($dataMeta) {
                                                     <button data-id="<?php echo $id ?>" class="btn btn-sm btn-warning btn-item-edit">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
-                                                    <?php if (in_array($type, array("select", "multi-select"))) { ?>
-                                                        <a title="Daftar" href="<?php echo "$listURL/$id" ?>" class="btn btn-sm btn-primary">
+                                                    <!--
+                                                    <?php /*if (in_array($type, array("select", "multi-select")) ) { */?>
+                                                        <a title="Daftar" href="<?php /*echo "$listURL/$id" */?>" class="btn btn-sm btn-primary">
                                                             <i class="fas fa-list-alt"></i>
                                                         </a>
-                                                    <?php } ?>
+                                                    <?php /*} */?>
+                                                    -->
                                                     <button data-id="<?php echo $id ?>" class="btn btn-sm btn-danger btn-item-delete">
                                                         <i class="fas fa-trash"></i>
                                                     </button>

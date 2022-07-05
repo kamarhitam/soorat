@@ -20,6 +20,12 @@ $dataMeta = null;
 if ($viewDataMeta) {
     $dataMeta = $helper->getArrayValue($viewDataMeta, "data");
 }
+
+$viewDataType = isset($this->viewDataType) ? $this->viewDataType : array();
+$dataType = null;
+if ($viewDataType) {
+    $dataType = $helper->getArrayValue($viewDataType, "data");
+}
 ?>
 <div class="row">
     <?php if ($viewSuccess) { ?>
@@ -47,19 +53,10 @@ if ($viewDataMeta) {
             <div class="card">
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-9">
+                        <div class="col-md-12">
                             <div class="form-group">
                                 <label for="add-title" class="col-form-label">Judul</label>
                                 <input type="text" class="form-control" id="add-title" name="add-title" placeholder="Judul">
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="add-type" class="col-form-label">Tipe</label>
-                                <select class="form-control select2bs4" id="add-type" name="add-type">
-                                    <option value="1">Template</option>
-                                    <option value="2">Surat</option>
-                                </select>
                             </div>
                         </div>
                         <div class="col-md-12">

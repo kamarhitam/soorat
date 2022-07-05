@@ -273,7 +273,7 @@ class View {
                     include($file);
                     $content = ob_get_clean();
                     $content = $this->removeWhiteSpace($content);
-                    echo $content;
+                    return $content;
                 }
             } catch (Exception $e) {
                 if (DEVELOPMENT_ENVIRONMENT):
@@ -281,6 +281,7 @@ class View {
                 endif;
             }
         endif;
+        return "";
     }
 
     private function removeWhiteSpace($text){

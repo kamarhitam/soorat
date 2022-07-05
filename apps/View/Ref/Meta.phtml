@@ -23,6 +23,19 @@ $dataTarget = array(
     array("id" => "posting", "name" => "Posting"),
     array("id" => "letter", "name" => "Surat")
 );
+
+$viewDataCmsType = isset($this->viewDataCmsType) ? $this->viewDataCmsType : array();
+if ($viewDataCmsType) {
+    $dataCmsType = $helper->getArrayValue($viewDataCmsType, 'data');
+    if ($dataCmsType) {
+        foreach ($dataCmsType as $itemCmsType) {
+            $itemCmsType["id"] = "posting-" . $itemCmsType["slug"];
+            $itemCmsType["name"] = "Posting: " . $itemCmsType["name"];
+            $dataTarget[] = $itemCmsType;
+        }
+    }
+}
+
 $dataType = array(
     array("id" => "text", "name" => "Teks Pendek"),
     array("id" => "textarea", "name" => "Teks Panjang"),
@@ -34,6 +47,13 @@ $dataType = array(
     array("id" => "datetime", "name" => "Tanggal dan Waktu"),
     array("id" => "auto-number", "name" => "Nomor Otomatis"),
 );
+
+$viewDataMeta = isset($this->viewDataMeta) ? $this->viewDataMeta : "";
+$dataMeta = null;
+if ($viewDataMeta) {
+    $dataMeta = $helper->getArrayValue($viewDataMeta, "data");
+}
+
 ?>
 <div class="row">
     <div class="col-md-12">
@@ -80,6 +100,7 @@ $dataType = array(
                                     <th>Kunci</th>
                                     <th>Jenis</th>
                                     <th>Target</th>
+                                    <th>Sumber</th>
                                     <th>Kepala</th>
                                 </tr>
                                 </thead>
@@ -98,10 +119,13 @@ $dataType = array(
                                             $id = $helper->getArrayValue($item, "id");
                                             $type = $helper->getArrayValue($item, "type");
                                             $target = $helper->getArrayValue($item, "target");
+                                            $source = $helper->getArrayValue($item, "source");
+                                            $parent = $helper->getArrayValue($item, "parent", 0);
                                             $kepala = $helper->getArrayValue($item, "parent-name");
 
                                             $typeName = '';
                                             $targetName = 'Tidak Ada';
+                                            $sourceName = 'Tidak Ada';
 
                                             if ($type) {
                                                 foreach ($dataType as $itemType) {
@@ -121,10 +145,20 @@ $dataType = array(
                                                 }
                                             }
 
+                                            if ($source) {
+                                                foreach ($dataMeta as $itemMeta) {
+                                                    if ($source == ("meta#" . $itemMeta["slug"])) {
+                                                        $sourceName = $itemMeta["name"];
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
                                             $item["DT_RowId"] = $id;
                                             $item["no"] = $no;
                                             $item["type_name"] = $typeName;
                                             $item["target_name"] = $targetName;
+                                            $item["source_name"] = $sourceName;
 
                                             ?>
                                             <tr data-key="id" data-value="<?php echo $id; ?>">
@@ -136,7 +170,7 @@ $dataType = array(
                                                     <button data-id="<?php echo $id ?>" class="btn btn-sm btn-warning btn-item-edit">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
-                                                    <?php if (in_array($type, array("select", "multi-select"))) { ?>
+                                                    <?php if (in_array($type, array("select", "multi-select")) && $parent == 0) { ?>
                                                         <a title="Daftar" href="<?php echo "$listURL/$id" ?>" class="btn btn-sm btn-primary bg-gradient-primary">
                                                             <i class="fas fa-list-alt"></i>
                                                         </a>
@@ -145,11 +179,12 @@ $dataType = array(
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </td>
-                                                <td data-key="name"><?php echo $item["name"] ?></td>
+                                                <td data-key="name"><?php echo $item["alias"] ?></td>
                                                 <td data-key="slug"><?php echo $item["slug"] ?></td>
                                                 <td data-key="type"><?php echo $typeName ?></td>
                                                 <td data-key="target"><?php echo $targetName ?></td>
-                                                <td data-key="target"><?php echo $kepala ?></td>
+                                                <td data-key="source"><?php echo $sourceName ?></td>
+                                                <td data-key="parent"><?php echo $kepala ?></td>
                                             </tr>
                                             <?php
                                         }

@@ -124,4 +124,8 @@ $(function () {
     $(document).on('change', '#add-files', function(e) {
         selectFiles(e);
     });
+    $(document).on('change', '#filter-type', function() {
+        const id = $(this).val();
+        location.href = baseURL + viewController + "/" + viewAction + "/" + id;
+    });
 });

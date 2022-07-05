@@ -118,6 +118,60 @@ class CmsGallery
         );
     }
 
+    public function fetchByTag($tag, $limit = 10, $page = 1)
+    {
+        $database = $this->database;
+        $queryCount = new Query();
+        $queryFetch = new Query();
+        $table = $this->table;
+
+        $start = ($page - 1) * $limit;
+        try {
+            $queryCount->select("COUNT($table.id) AS rowCount")
+                ->from($table)
+                ->where("tag = ?", $tag)
+            ;
+        } catch (\NG\Exception $e) {}
+
+        $count = 0;
+        $row = $database->fetchRow($queryCount);
+        if (is_array($row)) {
+            $count = $row['rowCount'];
+        }
+
+        $pages = 0;
+        $data = null;
+
+        if (!empty($count)){
+            if ($limit > 0){
+                $pages = (int) ($count / $limit);
+                if (($count % $limit) > 0) $pages += 1;
+            } else {
+                $pages = 1;
+            }
+
+            try {
+                $queryFetch->select("$table.*")
+                    ->from($table)
+                    ->where("$table.tag = ?", $tag)
+                    ->order("$table.id", "DESC");
+
+                if ($limit > 0)
+                    $queryFetch->limit("$start, $limit");
+            } catch (\NG\Exception $e) {}
+
+            $data = $database->fetchAll($queryFetch);
+        }
+
+        return array(
+            "total" => $count,
+            "pages" => $pages,
+            "page" => $page,
+            "limit" => $limit,
+            "data" => $data,
+        );
+    }
+
     public function find($key, $limit = 10, $page = 1)
     {
         $database = $this->database;
@@ -268,7 +322,7 @@ class CmsGallery
                                         "code" => $fileCode,
                                         "name" => $fileCode,
                                         "ext" => $file_ext,
-                                        "tag" => 0
+                                        "tag" => ''
                                     );
                                     $insert = $this->insert($dataInsert);
                                     $result = $insert;
@@ -301,5 +355,4 @@ class CmsGallery
 
         return $count;
     }
-
 }

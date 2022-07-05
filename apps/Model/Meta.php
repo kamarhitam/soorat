@@ -104,8 +104,11 @@ class Meta
 
             try {
                 $queryFetch->select(
-                    "$table.*" .
-                    ", IFNULL($tableParent.name, '') AS `parent-name`"
+                    "$table.id, $table.type, $table.target"
+                    . ", $table.slug, $table.source, $table.parent"
+                    . ", CONCAT(IFNULL(CONCAT($tableParent.name, '-'), ''), $table.`name`) as alias"
+                    . ", $table.name"
+                    . ", IFNULL($tableParent.name, '') AS `parent-name`"
                 )
                     ->from($table)
                     ->leftJoin($tableMeta, $tableParentClause)
@@ -129,7 +132,7 @@ class Meta
         );
     }
 
-    public function fetchSelect($limit = 10, $page = 1)
+    public function fetchSelect($parent = 0, $limit = 0, $page = 1)
     {
         $database = $this->database;
         $queryCount = new Query();
@@ -143,6 +146,7 @@ class Meta
                 ->from($table)
                 ->where("target <> ?", "constant")
                 ->andWhere("type in ('select', 'multi-select')")
+                ->andWhere("parent = $parent")
             ;
         } catch (\NG\Exception $e) {}
 
@@ -163,12 +167,22 @@ class Meta
                 $pages = 1;
             }
 
+            $tableParent = 'parent';
+            $tableMeta = "meta as $tableParent";
+            $tableParentClause = "$tableParent.id = $table.parent";
+
             try {
                 $queryFetch->select(
-                    "$table.*")
+                    "$table.id, $table.type, $table.target"
+                    . ", $table.slug, $table.source, $table.parent"
+                    . ", CONCAT(IFNULL(CONCAT($tableParent.name, '-'), ''), $table.`name`) as alias"
+                    . ", $table.name"
+                )
                     ->from($table)
+                    ->leftJoin($tableMeta, $tableParentClause)
                     ->where("$table.target <> ?", "constant")
-                    ->andWhere("type in ('select', 'multi-select')")
+                    ->andWhere("$table.type in ('select', 'multi-select')")
+                    ->andWhere("$table.parent = $parent")
                     ->order("$table.parent", "ASC")
                     ->order("$table.id", "ASC");
 
@@ -230,8 +244,10 @@ class Meta
 
             try {
                 $queryFetch->select(
-                    "$table.*" .
-                    ", IFNULL($tableParent.name, '') AS `parent-name`"
+                    "$table.id, $table.type, $table.target"
+                    . ", $table.slug, $table.source, $table.parent"
+                    . ", CONCAT(IFNULL(CONCAT($tableParent.name, '-'), ''), $table.`name`) as alias"
+                    . ", $table.name"
                 )
                     ->from($table)
                     ->leftJoin($tableMeta, $tableParentClause)
@@ -300,8 +316,10 @@ class Meta
 
             try {
                 $queryFetch->select(
-                    "$table.*" .
-                    ", IFNULL($tableParent.name, '') AS `parent-name`"
+                    "$table.id, $table.type, $table.target"
+                    . ", $table.slug, $table.source, $table.parent"
+                    . ", CONCAT(IFNULL(CONCAT($tableParent.name, '-'), ''), $table.`name`) as alias"
+                    . ", $table.name"
                 )
                     ->from($table)
                     ->leftJoin($tableMeta, $tableParentClause)
@@ -365,78 +383,14 @@ class Meta
 
             try {
                 $queryFetch->select(
-                    "$table.*" .
-                    ", IFNULL($tableParent.name, '') AS `parent-name`"
+                    "$table.id, $table.type, $table.target"
+                    . ", $table.slug, $table.source, $table.parent"
+                    . ", CONCAT(IFNULL(CONCAT($tableParent.name, '-'), ''), $table.`name`) as alias"
+                    . ", $table.name"
                 )
                     ->from($table)
                     ->leftJoin($tableMeta, $tableParentClause)
                     ->where("$table.parent = $parent")
-                    ->order("$table.parent", "ASC")
-                    ->order("$table.id", "ASC");
-
-                if ($limit > 0)
-                    $queryFetch->limit("$start, $limit");
-            } catch (\NG\Exception $e) {}
-
-            $data = $database->fetchAll($queryFetch);
-        }
-
-        return array(
-            "total" => $count,
-            "pages" => $pages,
-            "page" => $page,
-            "limit" => $limit,
-            "data" => $data,
-        );
-    }
-
-    public function find($type, $target, $key, $limit = 10, $page = 1)
-    {
-        $database = $this->database;
-        $queryCount = new Query();
-        $queryFetch = new Query();
-        $table = $this->table;
-
-        $start = ($page - 1) * $limit;
-
-        try {
-            $queryCount->select("COUNT(*) AS rowCount")
-                ->from($table)
-                ->where("target in ('$target', 'all')")
-                ->andWhere("type = ?", $type)
-                ->andWhere("name LIKE ?", "%$key%")
-            ;
-        } catch (\NG\Exception $e) {}
-
-        $count = 0;
-        $row = $database->fetchRow($queryCount);
-        if (is_array($row)) {
-            $count = $row['rowCount'];
-        }
-
-        $pages = 0;
-        $data = null;
-
-        $tableParent = 'parent';
-        $tableMeta = "meta as $tableParent";
-        $tableParentClause = "$tableParent.id = $table.parent";
-
-        if (!empty($count)){
-            if ($limit > 0){
-                $pages = (int) ($count / $limit);
-                if (($count % $limit) > 0) $pages += 1;
-            }
-
-            try {
-                $queryFetch->select(
-                    "$table.*" .
-                    ", IFNULL($tableParent.name, '') AS `parent-name`"
-                )
-                    ->from($table)
-                    ->leftJoin($tableMeta, $tableParentClause)
-                    ->where("$table.target in ('$target', 'all')")
-                    ->andWhere("$table.type = ?", $type)
-                    ->andWhere("$table.name LIKE ?", "%$key%")
                     ->order("$table.parent", "ASC")
                     ->order("$table.id", "ASC");
 
@@ -468,8 +422,10 @@ class Meta
 
         try {
             $query->select(
-                "$table.*" .
-                ", IFNULL($tableParent.name, '') AS `parent-name`"
+                "$table.id, $table.type, $table.target"
+                . ", $table.slug, $table.source, $table.parent"
+                . ", CONCAT(IFNULL(CONCAT($tableParent.name, '-'), ''), $table.`name`) as alias"
+                . ", $table.name"
             )
                 ->from($table)
                 ->leftJoin($tableMeta, $tableParentClause)
@@ -491,8 +447,10 @@ class Meta
 
         try {
             $query->select(
-                "$table.*" .
-                ", IFNULL($tableParent.name, '') AS `parent-name`"
+                "$table.id, $table.type, $table.target"
+                . ", $table.slug, $table.source, $table.parent"
+                . ", CONCAT(IFNULL(CONCAT($tableParent.name, '-'), ''), $table.`name`) as alias"
+                . ", $table.name"
             )
                 ->from($table)
                 ->leftJoin($tableMeta, $tableParentClause)

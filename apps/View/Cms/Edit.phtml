@@ -36,6 +36,11 @@ $dataMeta = null;
 if ($viewDataMeta) {
     $dataMeta = $helper->getArrayValue($viewDataMeta, "data");
 }
+$viewDataType = isset($this->viewDataType) ? $this->viewDataType : array();
+$dataType = null;
+if ($viewDataType) {
+    $dataType = $helper->getArrayValue($viewDataType, "data");
+}
 ?>
 <div class="row">
     <?php if ($viewSuccess) { ?>
@@ -60,26 +65,16 @@ if ($viewDataMeta) {
     <?php } ?>
     <div class="col-md-12">
         <form role="form" id="form-edit" method="post">
-            <input value="<?php echo $postId ?>" type="hidden" id="edit-id" name="edit-id" />
             <div class="card">
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-9">
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label for="edit-title" class="col-form-label">Judul</label>
                                 <input value="<?php echo $postTitle ?>" type="text" class="form-control" id="edit-title" name="edit-title" placeholder="Judul">
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="edit-type" class="col-form-label">Tipe</label>
-                                <select class="form-control select2bs4" id="edit-type" name="edit-type">
-                                    <option value="1" <?php if ($postType == 1) echo "selected" ?>>Template</option>
-                                    <option value="2" <?php if ($postType == 2) echo "selected" ?>>Surat</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-9">
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label for="edit-slug" class="col-form-label">Kunci</label>
                                 <input value="<?php echo $postSlug ?>" type="text" class="form-control" id="edit-slug" name="edit-slug" placeholder="Kunci">

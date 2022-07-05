@@ -101,6 +101,22 @@ $listURL = $baseUrl . strtolower($controllerPath) . "/" . strtolower($viewAction
                                         <?php
                                         $no = 0;
                                         $number = 0;
+                                        $items = null;
+                                        foreach ($rows as $row) {
+                                            $items = array();
+                                            $colIndex = 0;
+                                            foreach ($row as $cell) {
+                                                $value = $helper->getArrayValue($cell, "value");
+                                                $idMeta = $helper->getArrayValue($cell, "idmeta");
+                                                $id = $helper->getArrayValue($cell, "id");
+                                                $number = $helper->getArrayValue($cell, "num");
+                                                $items["id"][$colIndex] = $id;
+                                                $items["idmeta"][$colIndex] = $idMeta;
+                                                $items["number"][$colIndex] = $number;
+                                                $items["value"][$colIndex] = $value;
+                                                $colIndex++;
+                                            }
+                                        }
                                         foreach ($rows as $row) {
                                             $no++;
                                             ?>
@@ -120,19 +136,27 @@ $listURL = $baseUrl . strtolower($controllerPath) . "/" . strtolower($viewAction
                                                     </button>
                                                 </td>
                                                 <?php
-                                                $items = array();
-                                                foreach ($row as $cell) {
-                                                    $value = $helper->getArrayValue($cell, "value");
-                                                    $idMeta = $helper->getArrayValue($cell, "idmeta");
-                                                    $id = $helper->getArrayValue($cell, "id");
-                                                    $number = $helper->getArrayValue($cell, "num");
-                                                    $items["id"][] = $id;
-                                                    $items["idmeta"][] = $idMeta;
-                                                    $items["number"][] = $number;
-                                                    $items["value"][] = $value;
+                                                $colIndex = 0;
+                                                foreach ($columns as $column) {
+                                                    $itemVal = $helper->getArrayValue($items, "value");
+                                                    $value = "";
+                                                    if ($itemVal) {
+                                                        $value = $helper->getArrayValue($itemVal, $colIndex);
+                                                        if ($value) {
+                                                            $values = explode("***", $value);
+                                                            if (count($values) > 1) {
+                                                                $value = "<ul style='padding: 0 4px;'>";
+                                                                foreach ($values as $itemVal) {
+                                                                    $value .= "<li>$itemVal</li>";
+                                                                }
+                                                                $value .= "<ul>";
+                                                            }
+                                                        }
+                                                    }
                                                     ?>
                                                     <td><?php echo $value; ?></td>
                                                     <?php
+                                                    $colIndex++;
                                                 }
                                                 ?>
                                             </tr>

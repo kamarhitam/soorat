@@ -76,6 +76,7 @@ $viewSuccess = isset($this->viewSuccess) ? $this->viewSuccess : "";
                                     <th width="30">Ext</th>
                                     <th width="50">Ukuran</th>
                                     <th width="150">Alamat</th>
+                                    <th>Tag</th>
                                 </tr>
                                 </thead>
                                 <?php
@@ -134,7 +135,11 @@ $viewSuccess = isset($this->viewSuccess) ? $this->viewSuccess : "";
                                                     </button>
                                                 </td>
                                                 <td width="50" data-key="image" data-input="action" class="text-center">
-                                                    <embed src="<?php echo $path ?>" width="50" height="50">
+                                                    <?php if (in_array($ext, array("jpg", "jpeg", "png", "bmp"))) { ?>
+                                                    <img class="img-fluid" style="max-width: 50px; max-height: 50px" src="<?php echo $path ?>" height="50">
+                                                    <?php } else { ?>
+                                                        <img class="img-fluid" style="max-width: 50px; max-height: 50px" src="<?php echo $baseUrl ?>asset/img/attachment.png" height="50">
+                                                    <?php } ?>
                                                 </td>
 
                                                 <td data-key="date" data-text="daterev" data-edit="false"><?php echo $daterev; ?></td>
@@ -144,6 +149,7 @@ $viewSuccess = isset($this->viewSuccess) ? $this->viewSuccess : "";
                                                 <td data-key="path" data-edit="false">
                                                     <input class="form-control gallery-path" type="url" value="<?php echo $path; ?>" readonly>
                                                 </td>
+                                                <td data-key="tag" ><?php echo $tag; ?></td>
                                             </tr>
                                             <?php
                                         }

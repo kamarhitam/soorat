@@ -283,8 +283,12 @@ class RefController extends NG\Controller {
                                         $target = $_POST["add-target"];
                                         $slug = $helper->getSlug($name);
                                         $parent = 0;
+                                        $source = '';
                                         if (isset($_POST["add-parent"])) {
                                             $parent = $_POST["add-parent"];
+                                        }
+                                        if (isset($_POST["add-source"])) {
+                                            $source = $_POST["add-source"];
                                         }
 
                                         $oldSlug = $cls->getSlugAlready($slug);
@@ -306,9 +310,11 @@ class RefController extends NG\Controller {
                                                     $slug = "$slugParent-$slug";
                                                 }
                                             }
+                                            /*
                                             if (in_array($type, array("select", "multi-select"))) {
                                                 $type = "text";
                                             }
+                                            */
                                         }
 
                                         $data = array(
@@ -317,6 +323,7 @@ class RefController extends NG\Controller {
                                             "type"=> $type,
                                             "target"=> $target,
                                             "parent"=> $parent,
+                                            "source"=> $source,
                                         );
                                         $insert = $cls->insert($data);
                                         if ($insert){
@@ -393,8 +400,12 @@ class RefController extends NG\Controller {
                                             $cls = new MetaData();
                                             $update = 0;
                                             foreach ($ids as $key => $id) {
+                                                $value = $values[$key];
+                                                if (is_array($value)) {
+                                                    $value = implode('***', $value);
+                                                }
                                                 $data = array(
-                                                    "value"=> $values[$key],
+                                                    "value"=> $value,
                                                 );
                                                 $update += $cls->update($id, $data);
                                             }
@@ -424,21 +435,27 @@ class RefController extends NG\Controller {
                                         $target = $_POST["edit-target"];
                                         $slug = $_POST["edit-slug"];
                                         $parent = 0;
+                                        $source = '';
                                         if (isset($_POST["edit-parent"])) {
                                             $parent = $_POST["edit-parent"];
                                         }
+                                        if (isset($_POST["edit-source"])) {
+                                            $source = $_POST["edit-source"];
+                                        }
+                                        /*
                                         if ($parent) {
                                             if (in_array($type, array("select", "multi-select"))) {
                                                 $type = "text";
                                             }
                                         }
-
+                                        */
                                         $data = array(
                                             "name"=> $name,
                                             "slug"=> $slug,
                                             "type"=> $type,
                                             "target"=> $target,
                                             "parent"=> $parent,
+                                            "source"=> $source,
                                         );
 
                                         $cls = new Meta();
@@ -550,8 +567,10 @@ class RefController extends NG\Controller {
 
         $data = null;
         $dataAction = null;
+        $dataMeta = null;
         $dataMetaParent = null;
         $dataMetaChildren = null;
+        $dataCmsType = null;
 
         switch ($param1) {
             case "tipe-pengguna":
@@ -571,6 +590,7 @@ class RefController extends NG\Controller {
             case "meta":
                 $cls = new Meta();
                 $viewId = (int) $param2;
+
                 if ($viewId) {
                     $dataMeta = $cls->getById($viewId);
                     if ($dataMeta) {
@@ -616,6 +636,13 @@ class RefController extends NG\Controller {
                     $data = $cls->fetch(0);
                     $dataMetaParent = $cls->fetchParent(0);
                 }
+
+                $cls = new CmsType();
+                $dataCmsType = $cls->fetch(0);
+
+                $cls = new Meta();
+                $dataMeta = $cls->fetchSelect(0);
+
                 break;
         }
 
@@ -625,8 +652,10 @@ class RefController extends NG\Controller {
         $this->view->viewTitle = $title;
         $this->view->viewBreadcrumb = $breadcrumb;
         $this->view->viewDataAction = $dataAction;
+        $this->view->viewDataMeta = $dataMeta;
         $this->view->viewDataMetaParent = $dataMetaParent;
         $this->view->viewDataMetaChildren = $dataMetaChildren;
+        $this->view->viewDataCmsType = $dataCmsType;
         $this->view->viewData = $data;
         $this->view->viewId = $viewId;
         $this->view->viewSuccess = $success;

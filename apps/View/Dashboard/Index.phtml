@@ -1,24 +1,9 @@
 <?php
-$viewCountPostType = isset($this->viewCountPostType) ? $this->viewCountPostType : 0;
 $viewCountLetter = isset($this->viewCountLetter) ? $this->viewCountLetter : 0;
+$viewCountForm = isset($this->viewCountForm) ? $this->viewCountForm : 0;
 $viewCountGallery = isset($this->viewCountGallery) ? $this->viewCountGallery : 0;
 ?>
 <div class="card-group">
-    <div class="card border-right">
-        <div class="card-body">
-            <div class="d-flex d-lg-flex d-md-block align-items-center">
-                <div>
-                    <div class="d-inline-flex align-items-center">
-                        <h2 class="text-dark mb-1 font-weight-medium"><?php echo $viewCountPostType ?></h2>
-                    </div>
-                    <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Pola Surat</h6>
-                </div>
-                <div class="ml-auto mt-md-3 mt-lg-0">
-                    <span class="opacity-7 text-muted"><i data-feather="file-text"></i></span>
-                </div>
-            </div>
-        </div>
-    </div>
     <div class="card border-right">
         <div class="card-body">
             <div class="d-flex d-lg-flex d-md-block align-items-center">
@@ -44,9 +29,26 @@ $viewCountGallery = isset($this->viewCountGallery) ? $this->viewCountGallery : 0
                     <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Surat</h6>
                 </div>
                 <div class="ml-auto mt-md-3 mt-lg-0">
+                    <span class="opacity-7 text-muted"><i data-feather="file-text"></i></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-right">
+        <div class="card-body">
+            <div class="d-flex d-lg-flex d-md-block align-items-center">
+                <div>
+                    <div class="d-inline-flex align-items-center">
+                        <h2 class="text-dark mb-1 font-weight-medium"><?php echo $viewCountForm ?></h2>
+                    </div>
+                    <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Form</h6>
+                </div>
+                <div class="ml-auto mt-md-3 mt-lg-0">
                     <span class="opacity-7 text-muted"><i data-feather="mail"></i></span>
                 </div>
             </div>
         </div>
     </div>
+
 </div>

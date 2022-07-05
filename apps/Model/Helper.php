@@ -344,6 +344,7 @@ class Helper{
             return $this->terbilang($satuan / 1000000000) . " milyar " . $this->terbilang($satuan % 1000000000);
         elseif ($satuan <= 100000000000)
             return "";
+        return "";
     }
 
     function isDecimal( $val ){
@@ -406,7 +407,6 @@ class Helper{
     ) {
         $todayYear = date("Y");
         $todayMonth = date("m");
-
         switch ($inputType) {
             case "text":
                 ?>
@@ -555,14 +555,11 @@ class Helper{
                                         if ($metaData) {
                                             $dataMeta = $this->getArrayValue($metaData, 'data');
                                             if ($dataMeta) {
-                                                $itemList = array();
-                                                $newIdMeta = 0;
                                                 foreach ($dataMeta as $itemMeta) {
                                                     $item = array();
                                                     foreach ($itemMeta as $num => $itemSubMeta) {
                                                         $item = $itemSubMeta[0];
                                                         $item["name"] = $item["value"];
-                                                        $oldId = $item["id"];
                                                         $item["id"] = $item["num"] . "#" . $item["idparent"];
                                                         unset ($item["value"]);
                                                         unset ($item["idparent"]);
@@ -579,16 +576,46 @@ class Helper{
                                         if ($metaData) {
                                             $dataMeta = $this->getArrayValue($metaData, 'data');
                                             if ($dataMeta) {
-                                                $itemList = array();
-                                                $newIdMeta = 0;
                                                 foreach ($dataMeta as $itemMeta) {
                                                     $itemMeta["name"] = $itemMeta["value"];
-                                                    // $itemMeta["id"] = $itemMeta["idmeta"] . "#" . $itemMeta["num"];
                                                     unset ($itemMeta["value"]);
                                                     unset ($itemMeta["num"]);
                                                     unset ($itemMeta["idmeta"]);
                                                     $itemMeta["selected"] = "";
                                                     $selectList[] = $itemMeta;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            } else if ($arrInputSource[0] == "post"){
+                                $clsPost = new CmsPost();
+                                $clsType = new CmsType();
+                                $post = $clsPost->getBySlug($arrInputSource[1]);
+                                if ($post) {
+                                    $typePost = $this->getArrayValue($post, 'type');
+                                    $idPost = $this->getArrayValue($post, 'id');
+                                    if ($typePost) {
+                                        $cmsType = $clsType->getById($typePost);
+                                        if ($cmsType) {
+                                            $clsPostData = new PostData();
+                                            if ($clsPostData) {
+                                                $dataPostDataRaw = $clsPostData->fetch($typePost, $idPost, 0, 0);
+                                                if ($dataPostDataRaw) {
+                                                    $dataPostData = $this->getArrayValue($dataPostDataRaw, 'data');
+                                                    if ($dataPostData) {
+                                                        foreach ($dataPostData as $itemPostData) {
+                                                            $idLetter = $this->getArrayValue($itemPostData, 'id');
+                                                            $detailKeys = $this->getArrayValue($itemPostData, 'detail-keys');
+                                                            $detailValues = $this->getArrayValue($itemPostData, 'detail-values');
+                                                            if ($detailKeys) {
+                                                                $arrDetailValues = explode("***", $detailValues);
+                                                                $id = $idLetter;
+                                                                $name = $arrDetailValues[0];
+                                                                $selectList[] = array("id" => $id, "name" => $name);
+                                                            }
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
@@ -632,7 +659,6 @@ class Helper{
                             $selectedIds[] = $rawSelectedIds;
                         }
                         foreach ($selectList as $itemList) {
-                            $selected = "";
                             $idItem = $inputSource . ':' . $itemList["id"];
                             $nameItem = $itemList["name"];
                             $itemValue = "[$idItem]";
@@ -708,14 +734,11 @@ class Helper{
                                         if ($metaData) {
                                             $dataMeta = $this->getArrayValue($metaData, 'data');
                                             if ($dataMeta) {
-                                                $itemList = array();
-                                                $newIdMeta = 0;
                                                 foreach ($dataMeta as $itemMeta) {
                                                     $item = array();
                                                     foreach ($itemMeta as $num => $itemSubMeta) {
                                                         $item = $itemSubMeta[0];
                                                         $item["name"] = $item["value"];
-                                                        $oldId = $item["id"];
                                                         $item["id"] = $item["num"] . "#" . $item["idparent"];
                                                         $item["selected"] = "";
                                                         unset ($item["value"]);
@@ -732,8 +755,6 @@ class Helper{
                                         if ($metaData) {
                                             $dataMeta = $this->getArrayValue($metaData, 'data');
                                             if ($dataMeta) {
-                                                $itemList = array();
-                                                $newIdMeta = 0;
                                                 foreach ($dataMeta as $itemMeta) {
                                                     $itemMeta["name"] = $itemMeta["value"];
                                                     $itemMeta["selected"] = "";
@@ -741,6 +762,39 @@ class Helper{
                                                     unset ($itemMeta["num"]);
                                                     unset ($itemMeta["idmeta"]);
                                                     $selectList[] = $itemMeta;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }  else if ($arrInputSource[0] == "post"){
+                                $clsPost = new CmsPost();
+                                $clsType = new CmsType();
+                                $post = $clsPost->getBySlug($arrInputSource[1]);
+                                if ($post) {
+                                    $typePost = $this->getArrayValue($post, 'type');
+                                    $idPost = $this->getArrayValue($post, 'id');
+                                    if ($typePost) {
+                                        $cmsType = $clsType->getById($typePost);
+                                        if ($cmsType) {
+                                            $clsPostData = new PostData();
+                                            if ($clsPostData) {
+                                                $dataPostDataRaw = $clsPostData->fetch($typePost, $idPost, 0, 0);
+                                                if ($dataPostDataRaw) {
+                                                    $dataPostData = $this->getArrayValue($dataPostDataRaw, 'data');
+                                                    if ($dataPostData) {
+                                                        foreach ($dataPostData as $itemPostData) {
+                                                            $idLetter = $this->getArrayValue($itemPostData, 'id');
+                                                            $detailKeys = $this->getArrayValue($itemPostData, 'detail-keys');
+                                                            $detailValues = $this->getArrayValue($itemPostData, 'detail-values');
+                                                            if ($detailKeys) {
+                                                                $arrDetailValues = explode("***", $detailValues);
+                                                                $id = $idLetter;
+                                                                $name = $arrDetailValues[0];
+                                                                $selectList[] = array("id" => $id, "name" => $name);
+                                                            }
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
@@ -754,7 +808,6 @@ class Helper{
                 if ($selectedIds) {
                     foreach ($selectList as $num => $itemList) {
                         $idItem = $inputSource . ':' . $itemList["id"];
-                        $nameItem = $itemList["name"];
                         $itemList["selected"] = "";
                         $itemList["index"] = $num + 999999;
                         foreach ($selectedIds as $index => $selectedId) {
@@ -808,5 +861,95 @@ class Helper{
                 <?php
                 break;
         }
+    }
+
+    function renderData($value) {
+        preg_match_all("^\[(.*?)]^", $value, $matches);
+        if (count($matches) > 1){
+            if ($matches[1]) {
+                if (count($matches[1]) > 0){
+                    $selectedVal = $matches[1][0];
+                    if ($selectedVal) {
+                        $value = array();
+                        $selectedIds = explode(',', $selectedVal);
+                        if ($selectedIds) {
+                            foreach ($selectedIds as $selectedId) {
+                                $arrSelectedId = explode("#", $selectedId);
+                                $selectedIdType = "";
+                                $selectedIdKey = "";
+                                $selectedIdVal = "";
+                                $selectedIdKeyVal = $arrSelectedId[0];
+                                if (count($arrSelectedId) == 2){
+                                    $selectedIdType = $arrSelectedId[0];
+                                    $selectedIdKeyVal = $arrSelectedId[1];
+                                }
+                                $arrSelectedIdKeyVal = explode(":", $selectedIdKeyVal);
+                                if (count($arrSelectedIdKeyVal) == 2) {
+                                    $selectedIdKey = $arrSelectedIdKeyVal[0];
+                                    $selectedIdVal = $arrSelectedIdKeyVal[1];
+                                }
+                                if ($selectedIdKey) {
+                                    if ($selectedIdType == "meta") {
+                                        $cls = new MetaData();
+                                        $dataMetaRaw = $cls->fetchBySlugMeta($selectedIdKey, 0, 0);
+                                        if ($dataMetaRaw) {
+                                            $dataMeta = $dataMetaRaw["data"];
+                                            if ($dataMeta) {
+                                                foreach ($dataMeta as $itemMeta) {
+                                                    $value[] = $itemMeta["value"];
+                                                }
+                                            }
+                                        }
+                                    } else if ($selectedIdType == "post") {
+                                        $cls = new CmsPost();
+                                        $dataPost = $cls->getBySlug($selectedIdKey);
+                                        if ($dataPost) {
+                                            $idPost = $dataPost["id"];
+                                            $typePost = $dataPost["type"];
+                                            $cls = new PostData();
+                                            $dataPostDataRaw = $cls->fetch($typePost, $idPost, 0, 0);
+                                            if ($dataPostDataRaw) {
+                                                $dataPostData = $dataPostDataRaw["data"];
+                                                if ($dataPostData) {
+                                                    foreach ($dataPostData as $itemPostData) {
+                                                        $idPostData = $itemPostData["id"];
+                                                        if ($idPostData) {
+                                                            $cls = new Detail();
+                                                            $dataDetailRow = $cls->fetchByTarget("data", $idPostData);
+                                                            if ($dataDetailRow) {
+                                                                $dataDetail = $dataDetailRow["data"];
+                                                                if ($dataDetail) {
+                                                                    foreach ($dataDetail as $itemDetail) {
+                                                                        $detailKey = $itemDetail["key"];
+                                                                        $detailValue = $itemDetail["value"];
+                                                                        $detailValue = $this->renderData($detailValue);
+                                                                        $value[] = array($detailKey => $detailValue);
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        switch ($selectedIdKey) {
+                                            case "user":
+                                                $cls = new User();
+                                                $dataUser = $cls->getById($selectedIdVal);
+                                                if ($dataUser) {
+                                                    $value[] = $dataUser["name"];
+                                                }
+                                                break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return $value;
     }
 }

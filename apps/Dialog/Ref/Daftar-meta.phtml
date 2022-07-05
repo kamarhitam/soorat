@@ -56,6 +56,7 @@ if ($viewDataMetaChildren) {
                                 $metaSlug = $helper->getArrayValue($itemMeta, "slug");
                                 $metaTitle = $helper->getArrayValue($itemMeta, "name");
                                 $metaType = $helper->getArrayValue($itemMeta, "type");
+                                $metaSource = $helper->getArrayValue($itemMeta, "source");
                                 ?>
                                 <div class="col-md-12">
                                     <div class="form-group">
@@ -64,8 +65,122 @@ if ($viewDataMetaChildren) {
                                         </label>
                                         <input type="hidden" class="form-control" id="add-type-<?php echo $metaId ?>"
                                                name="add-type[<?php echo $metaId ?>]" value="<?php echo $metaType ?>">
-                                        <input type="text" class="form-control" id="add-value-<?php echo $metaId ?>"
-                                               name="add-value[<?php echo $metaId ?>]" placeholder="<?php echo $metaTitle ?>">
+                                        <?php
+                                        $cls = new Meta();
+                                        $arrMetaSource = explode('#', $metaSource);
+                                        $selectList = null;
+                                        if (count($arrMetaSource) == 2) {
+                                            $sourceMetaSlug = $arrMetaSource[1];
+                                            $sourceMeta = $cls->getBySlug($sourceMetaSlug);
+                                            if ($sourceMeta) {
+                                                $sourceMetaId = $sourceMeta["id"];
+                                                if ($sourceMetaId) {
+                                                    $cls = new MetaData();
+                                                    $dataMetaDataRaw = $cls->fetchByIdMeta($sourceMetaId, 0, 0);
+                                                    if ($dataMetaDataRaw) {
+                                                        $dataMetaData = $dataMetaDataRaw["data"];
+                                                        if ($dataMetaData) {
+                                                            foreach ($dataMetaData as $itemMetaData) {
+                                                                $selectList[] = $itemMetaData["value"];
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        switch ($metaType) {
+                                            case "text":
+                                            case "auto-number":
+                                                ?>
+                                                <input type="text" class="form-control" id="add-value-<?php echo $metaId ?>"
+                                                       name="add-value[<?php echo $metaId ?>]" placeholder="<?php echo $metaTitle ?>">
+                                                <?php
+                                                break;
+                                            case "number":
+                                                ?>
+                                                <input type="number" class="form-control" id="add-value-<?php echo $metaId ?>"
+                                                       name="add-value[<?php echo $metaId ?>]" placeholder="<?php echo $metaTitle ?>">
+                                                <?php
+                                                break;
+                                            case "date":
+                                                ?>
+                                                <div class="today-date input-group date" id="div-value-<?php echo $metaId ?>"
+                                                     data-target-input="nearest">
+                                                    <input type="text" class="form-control datetimepicker-input"
+                                                           data-target="#div-value-<?php echo $metaId ?>" id="add-value-<?php echo $metaId ?>"
+                                                           name="add-value[<?php echo $metaId ?>]" value="" >
+                                                    <div class="input-group-append" data-target="#div-value-<?php echo $metaId ?>"
+                                                         data-toggle="datetimepicker">
+                                                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                                    </div>
+                                                </div>
+                                                <?php
+                                                break;
+                                            case "time":
+                                                ?>
+                                                <div class="today-time input-group date" id="div-value-<?php echo $metaId ?>"
+                                                     data-target-input="nearest">
+                                                    <input type="text" class="form-control datetimepicker-input"
+                                                           data-target="#div-value-<?php echo $metaId ?>" id="add-value-<?php echo $metaId ?>"
+                                                           name="add-value[<?php echo $metaId ?>]" value="" >
+                                                    <div class="input-group-append" data-target="#div-value-<?php echo $metaId ?>"
+                                                         data-toggle="datetimepicker">
+                                                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                                    </div>
+                                                </div>
+                                                <?php
+                                                break;
+                                            case "datetime":
+                                                ?>
+                                                <div class="today-datetime input-group date" id="div-value-<?php echo $metaId ?>"
+                                                     data-target-input="nearest">
+                                                    <input type="text" class="form-control datetimepicker-input"
+                                                           data-target="#div-value-<?php echo $metaId ?>" id="add-value-<?php echo $metaId ?>"
+                                                           name="add-value[<?php echo $metaId ?>]" value="" >
+                                                    <div class="input-group-append" data-target="#div-value-<?php echo $metaId ?>"
+                                                         data-toggle="datetimepicker">
+                                                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                                    </div>
+                                                </div>
+                                                <?php
+                                                break;
+                                            case "textarea":
+                                                ?>
+                                                <textarea rows="2" class="form-control" id="add-value-<?php echo $metaId ?>"
+                                                          name="add-value[<?php echo $metaId ?>]"></textarea>
+                                                <?php
+                                                break;
+                                            case "select":
+                                                ?>
+                                                <select class="form-control select2bs4" id="add-value-<?php echo $metaId ?>"
+                                                        name="add-value[<?php echo $metaId ?>]">
+                                                    <option value="">Tidak Ada</option>
+                                                    <?php if ($selectList) {
+                                                        foreach ($selectList as $itemList) {
+                                                            ?>
+                                                            <option value="<?php echo $itemList ?>"><?php echo $itemList ?></option>
+                                                        <?php
+                                                        }
+                                                    } ?>
+                                                </select>
+                                                <?php
+                                                break;
+                                            case "multi-select":
+                                                ?>
+                                                <select class="form-control select2bs4" id="add-value-<?php echo $metaId ?>"
+                                                        name="add-value[<?php echo $metaId ?>][]" multiple="multiple">
+                                                    <?php if ($selectList) {
+                                                        foreach ($selectList as $itemList) {
+                                                            ?>
+                                                            <option value="<?php echo $itemList ?>"><?php echo $itemList ?></option>
+                                                            <?php
+                                                        }
+                                                    } ?>
+                                                </select>
+                                                <?php
+                                                break;
+                                        }
+                                        ?>
                                     </div>
                                 </div>
                                 <?php
@@ -113,6 +228,7 @@ if ($viewDataMetaChildren) {
                                 $metaSlug = $helper->getArrayValue($itemMeta, "slug");
                                 $metaTitle = $helper->getArrayValue($itemMeta, "name");
                                 $metaType = $helper->getArrayValue($itemMeta, "type");
+                                $metaSource = $helper->getArrayValue($itemMeta, "source");
                                 ?>
                                 <div class="col-md-12">
                                     <div class="form-group">
@@ -123,9 +239,135 @@ if ($viewDataMetaChildren) {
                                                name="edit-id[<?php echo $metaId ?>]" data-field="id[<?php echo $i ?>]">
                                         <input type="hidden" class="form-control" id="add-type-<?php echo $metaId ?>"
                                                name="edit-type[<?php echo $metaId ?>]" value="<?php echo $metaType ?>">
-                                        <input type="text" class="form-control" id="add-value-<?php echo $metaId ?>"
-                                               data-field="value[<?php echo $i ?>]"
-                                               name="edit-value[<?php echo $metaId ?>]" placeholder="<?php echo $metaTitle ?>">
+                                        <?php
+                                        $cls = new Meta();
+                                        $arrMetaSource = explode('#', $metaSource);
+                                        $selectList = null;
+                                        if (count($arrMetaSource) == 2) {
+                                            $sourceMetaSlug = $arrMetaSource[1];
+                                            $sourceMeta = $cls->getBySlug($sourceMetaSlug);
+                                            if ($sourceMeta) {
+                                                $sourceMetaId = $sourceMeta["id"];
+                                                if ($sourceMetaId) {
+                                                    $cls = new MetaData();
+                                                    $dataMetaDataRaw = $cls->fetchByIdMeta($sourceMetaId, 0, 0);
+                                                    if ($dataMetaDataRaw) {
+                                                        $dataMetaData = $dataMetaDataRaw["data"];
+                                                        if ($dataMetaData) {
+                                                            foreach ($dataMetaData as $itemMetaData) {
+                                                                $selectList[] = $itemMetaData["value"];
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        switch ($metaType) {
+                                            case "text":
+                                            case "auto-number":
+                                                ?>
+                                                <input type="text" class="form-control" id="edit-value-<?php echo $metaId ?>"
+                                                       data-field="value[<?php echo $i ?>]"
+                                                       name="edit-value[<?php echo $metaId ?>]" placeholder="<?php echo $metaTitle ?>">
+                                                <?php
+                                                break;
+                                            case "number":
+                                                ?>
+                                                <input type="number" class="form-control" id="edit-value-<?php echo $metaId ?>"
+                                                       data-field="value[<?php echo $i ?>]"
+                                                       name="edit-value[<?php echo $metaId ?>]" placeholder="<?php echo $metaTitle ?>">
+                                                <?php
+                                                break;
+                                            case "date":
+                                                ?>
+                                                <div class="today-date input-group date" id="div-value-<?php echo $metaId ?>"
+                                                     data-target-input="nearest">
+                                                    <input type="text" class="form-control datetimepicker-input"
+                                                           data-field="value[<?php echo $i ?>]"
+                                                           data-target="#div-value-<?php echo $metaId ?>" id="edit-value-<?php echo $metaId ?>"
+                                                           name="edit-value[<?php echo $metaId ?>]" value="" >
+                                                    <div class="input-group-append" data-target="#div-value-<?php echo $metaId ?>"
+                                                         data-toggle="datetimepicker">
+                                                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                                    </div>
+                                                </div>
+                                                <?php
+                                                break;
+                                            case "time":
+                                                ?>
+                                                <div class="today-time input-group date" id="div-value-<?php echo $metaId ?>"
+                                                     data-target-input="nearest">
+                                                    <input type="text" class="form-control datetimepicker-input"
+                                                           data-field="value[<?php echo $i ?>]"
+                                                           data-target="#div-value-<?php echo $metaId ?>" id="edit-value-<?php echo $metaId ?>"
+                                                           name="edit-value[<?php echo $metaId ?>]" value="" >
+                                                    <div class="input-group-append" data-target="#div-value-<?php echo $metaId ?>"
+                                                         data-toggle="datetimepicker">
+                                                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                                    </div>
+                                                </div>
+                                                <?php
+                                                break;
+                                            case "datetime":
+                                                ?>
+                                                <div class="today-datetime input-group date" id="div-value-<?php echo $metaId ?>"
+                                                     data-target-input="nearest">
+                                                    <input type="text" class="form-control datetimepicker-input"
+                                                           data-field="value[<?php echo $i ?>]"
+                                                           data-target="#div-value-<?php echo $metaId ?>" id="edit-value-<?php echo $metaId ?>"
+                                                           name="edit-value[<?php echo $metaId ?>]" value="" >
+                                                    <div class="input-group-append" data-target="#div-value-<?php echo $metaId ?>"
+                                                         data-toggle="datetimepicker">
+                                                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                                    </div>
+                                                </div>
+                                                <?php
+                                                break;
+                                            case "textarea":
+                                                ?>
+                                                <textarea rows="2" class="form-control" id="edit-value-<?php echo $metaId ?>"
+                                                          name="edit-value[<?php echo $metaId ?>]"
+                                                          data-field="value[<?php echo $i ?>]"></textarea>
+                                                <?php
+                                                break;
+                                            case "select":
+                                                ?>
+                                                <select class="form-control select2bs4" id="edit-value-<?php echo $metaId ?>"
+                                                        data-field="value[<?php echo $i ?>]"
+                                                        name="edit-value[<?php echo $metaId ?>]">
+                                                    <option value="">Tidak Ada</option>
+                                                    <?php if ($selectList) {
+                                                        foreach ($selectList as $itemList) {
+                                                            ?>
+                                                            <option value="<?php echo $itemList ?>"><?php echo $itemList ?></option>
+                                                            <?php
+                                                        }
+                                                    } ?>
+                                                </select>
+                                                <?php
+                                                break;
+                                            case "multi-select":
+                                                ?>
+                                                <select class="form-control select2bs4" id="edit-value-<?php echo $metaId ?>"
+                                                        data-field="value[<?php echo $i ?>]"
+                                                        name="edit-value[<?php echo $metaId ?>][]" multiple="multiple">
+                                                    <?php if ($selectList) {
+                                                        foreach ($selectList as $itemList) {
+                                                            ?>
+                                                            <option value="<?php echo $itemList ?>"><?php echo $itemList ?></option>
+                                                            <?php
+                                                        }
+                                                    } ?>
+                                                </select>
+                                                <?php
+                                                break;
+                                        }
+                                        ?>
+                                        <!--
+                                        <input type="text" class="form-control" id="add-value-<?php /*echo $metaId */?>"
+                                               data-field="value[<?php /*echo $i */?>]"
+                                               name="edit-value[<?php /*echo $metaId */?>]" placeholder="<?php /*echo $metaTitle */?>">
+                                        -->
                                     </div>
                                 </div>
                                 <?php

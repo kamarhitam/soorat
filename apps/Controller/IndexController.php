@@ -58,6 +58,121 @@ class IndexController extends NG\Controller {
     }
 
     public function IndexAction() {
-        Route::redirect(Uri::baseUrl() . "masuk");
+        $helper = $this->helper;
+        $requests = Route::getRequests();
+        $baseUrl = Uri::baseUrl();
+
+        $controllerPath = Registry::get('controllerPath');
+        $controllerName = Registry::get('controllerName');
+
+        $cls = new CmsType();
+        $dataTypeRaw = $cls->fetch(0, 0);
+        $seksiType = 0;
+        $posts = array();
+
+        if ($dataTypeRaw) {
+            $dataType = $helper->getArrayValue($dataTypeRaw, 'data');
+            foreach ($dataType as $itemType) {
+                if ($itemType["slug"] == "seksi") {
+                    $seksiType = $itemType["id"];
+                    break;
+                }
+            }
+            if ($seksiType) {
+                $cls = new CmsPost();
+                $clsMetaData = new MetaData();
+                $clsUser = new User();
+
+                $dataPostRaw = $cls->fetchByType($seksiType, 0, 0);
+                if ($dataPostRaw) {
+                    $dataPost = $helper->getArrayValue($dataPostRaw, 'data');
+                    if ($dataPost) {
+                        foreach ($dataPost as $itemPost) {
+                            $detailKeys = $helper->getArrayValue($itemPost, "detail-keys");
+                            $detailValues = $helper->getArrayValue($itemPost, "detail-values");
+                            if ($detailKeys){
+                                $arrDetailKeys = explode("***", $detailKeys);
+                                $arrDetailValues = explode("***", $detailValues);
+                                for ($k = 0; $k < count($arrDetailKeys); $k++) {
+                                    $itemDetailKeys = $arrDetailKeys[$k];
+                                    $itemDetailValues = $arrDetailValues[$k];
+                                    $itemPost[$itemDetailKeys] = $itemDetailValues;
+                                    preg_match_all("^\[(.*?)]^", $itemDetailValues, $matches);
+                                    if (count($matches) > 1){
+                                        if ($matches[1]) {
+                                            if (count($matches[1]) > 0){
+                                                $selectedVal = $matches[1][0];
+                                                if ($selectedVal) {
+                                                    $selectedIds = explode(',', $selectedVal);
+                                                    $selectedIdVals = array();
+                                                    if ($selectedIds) {
+                                                        foreach ($selectedIds as $selectedId) {
+                                                            $arrSelectedId = explode(':', $selectedId);
+                                                            if ($arrSelectedId) {
+                                                                $selectedIdKey = $arrSelectedId[0];
+                                                                $selectedIdVal = $arrSelectedId[1];
+                                                                $arrSelectedIdVal = explode('#', $selectedIdVal);
+                                                                if (count($arrSelectedIdVal) == 2) {
+                                                                    $selectedIdVals[] = $arrSelectedIdVal[1];
+                                                                } else {
+                                                                    $selectedIdVals[] = $selectedIdVal;
+                                                                }
+                                                                if ($selectedIdKey) {
+                                                                    $arrSelectedIdKey = explode('#', $selectedIdKey);
+                                                                    if ($arrSelectedIdKey) {
+                                                                        $selectedIdKeyType = $arrSelectedIdKey[0];
+                                                                        if (count($arrSelectedIdKey) > 1) {
+                                                                            if ($selectedIdKeyType == "meta") {
+                                                                                $valSelectedId = implode(",", $selectedIdVals);
+                                                                                $itemPost[$itemDetailKeys] = $clsMetaData->fetchByIds($valSelectedId);
+                                                                            }
+                                                                        } else {
+                                                                            switch ($selectedIdKeyType) {
+                                                                                case "user":
+                                                                                    $valSelectedId = implode(",", $selectedIdVals);
+                                                                                    $itemPost[$itemDetailKeys] = $clsUser->fetchByIds($valSelectedId);
+                                                                                    break;
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                unset($itemPost["detail-keys"]);
+                                unset($itemPost["detail-values"]);
+                            }
+                            $posts[] = $itemPost;
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($posts) {
+            $oldPosts = $posts;
+            $posts = array();
+            foreach ($oldPosts as $post) {
+                $kategori = $helper->getArrayValue($post, 'kategori');
+                if ($kategori) {
+                    unset($post['kategori']);
+                    $posts[strtolower($kategori)][] = $post;
+                }
+            }
+        }
+
+        $cls = new CmsGallery();
+        $dataGallery = $cls->fetchByTag("event");
+
+        $title = "Beranda";
+
+        $this->view->viewDataPosts = $posts;
+        $this->view->viewDataGallery = $dataGallery;
+        $this->view->viewTitle = $title;
     }
 }

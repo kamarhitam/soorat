@@ -4,6 +4,6 @@ CREATE TABLE IF NOT EXISTS `gallery` (
   `code` varchar(32),
   `name` varchar(200),
   `ext` varchar(10),
-  `tag` int(11),
+  `tag` varchar(20),
   UNIQUE KEY `code` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

@@ -43,16 +43,18 @@ $listURL = $baseUrl . strtolower($controllerPath);
                                         <table style="width: 100%">
                                             <tr>
                                                 <td><label><?php echo $title ?></label></td>
-                                                <td width="120">
+                                                <td width="70">
                                                     <a title="Daftar" href="<?php echo "$listURL/$id" ?>" class="btn btn-sm btn-primary">
                                                         <i class="fas fa-list-alt"></i>
                                                     </a>
                                                     <button title="Form" data-id="<?php echo $id ?>" class="btn btn-sm btn-light btn-item-form">
                                                         <i class="fas fa-file"></i>
                                                     </button>
-                                                    <a title="Edit" href="<?php echo "$editURL/$id" ?>" class="btn btn-sm btn-warning">
+                                                    <!--
+                                                    <a title="Edit" href="<?php /*echo "$editURL/$id" */?>" class="btn btn-sm btn-warning">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
+                                                    -->
                                                 </td>
                                             </tr>
                                         </table>

@@ -66,7 +66,7 @@ class CmsInput
         return $database->query($query);
     }
 
-    public function fetch($limit = 10, $page = 1)
+    public function fetch($target = "", $parent = 0, $limit = 10, $page = 1)
     {
         $database = $this->database;
         $queryCount = new Query();
@@ -78,6 +78,92 @@ class CmsInput
         try {
             $queryCount->select("COUNT(*) AS rowCount")
                 ->from($table)
+                ->where("id > 0");
+            if ($target) {
+                $queryCount->andWhere("target = ?", $target);
+            }
+            if ($parent) {
+                $queryCount->andWhere("parent = ?", $parent);
+            }
+        } catch (\NG\Exception $e) {}
+
+        $count = 0;
+        $row = $database->fetchRow($queryCount);
+        if (is_array($row)) {
+            $count = $row['rowCount'];
+        }
+
+        $pages = 0;
+        $data = null;
+
+        if (!empty($count)){
+            if ($limit > 0){
+                $pages = (int) ($count / $limit);
+                if (($count % $limit) > 0) $pages += 1;
+            } else {
+                $pages = 1;
+            }
+
+            $tableParent = 'parent';
+            $tableInput = "input as $tableParent";
+            $tableParentClause = "$tableParent.id = $table.parent";
+
+            try {
+                $queryFetch->select(
+                    "$table.*"
+                    . ", IFNULL($tableParent.title, '') AS `parent-name`"
+                )
+                    ->from($table)
+                    ->leftJoin($tableInput, $tableParentClause)
+                    ->where("$table.id > 0");
+
+                if ($target) {
+                    $queryFetch->andWhere("$table.target = ?", $target);
+                }
+                if ($parent) {
+                    $queryFetch->andWhere("$table.parent = ?", $parent);
+                }
+
+                $queryFetch->order("$table.id", "ASC");
+
+                if ($limit > 0)
+                    $queryFetch->limit("$start, $limit");
+            } catch (\NG\Exception $e) {}
+
+            $data = $database->fetchAll($queryFetch);
+            /*
+            if ($rows) {
+                foreach ($rows as $row) {
+                    $source = $row["source"];
+                    $row["sources"] = $this->setSource($source);
+                    $data[] = $row;
+                }
+            }
+            */
+        }
+
+        return array(
+            "total" => $count,
+            "pages" => $pages,
+            "page" => $page,
+            "limit" => $limit,
+            "data" => $data,
+        );
+    }
+
+    public function fetchByTarget($target, $limit = 10, $page = 1)
+    {
+        $database = $this->database;
+        $queryCount = new Query();
+        $queryFetch = new Query();
+        $table = $this->table;
+
+        $start = ($page - 1) * $limit;
+
+        try {
+            $queryCount->select("COUNT(*) AS rowCount")
+                ->from($table)
+                ->where("target = ?", $target)
             ;
         } catch (\NG\Exception $e) {}
 
@@ -109,6 +195,7 @@ class CmsInput
                 )
                     ->from($table)
                     ->leftJoin($tableInput, $tableParentClause)
+                    ->where("$table.target = ?", $target)
                     ->order("$table.id", "ASC");
 
                 if ($limit > 0)
@@ -196,6 +283,77 @@ class CmsInput
         );
     }
 
+    public function fetchParentByTarget($slug, $limit = 10, $page = 1)
+    {
+        $database = $this->database;
+        $queryCount = new Query();
+        $queryFetch = new Query();
+        $table = $this->table;
+
+        $start = ($page - 1) * $limit;
+
+        try {
+            $queryCount->select("COUNT(*) AS rowCount")
+                ->from($table)
+                ->where("parent = 0")
+                ->andWhere("target = ?", $slug)
+            ;
+        } catch (\NG\Exception $e) {}
+
+        $count = 0;
+        $row = $database->fetchRow($queryCount);
+        if (is_array($row)) {
+            $count = $row['rowCount'];
+        }
+
+        $pages = 0;
+        $data = null;
+
+        if (!empty($count)){
+            if ($limit > 0){
+                $pages = (int) ($count / $limit);
+                if (($count % $limit) > 0) $pages += 1;
+            } else {
+                $pages = 1;
+            }
+
+            $tableParent = 'parent';
+            $tableInput = "input as $tableParent";
+            $tableParentClause = "$tableParent.parent = $table.id";
+
+            try {
+                $queryFetch->select(
+                    "$table.*"
+                     . ", GROUP_CONCAT($tableParent.id ORDER BY $tableParent.id ASC SEPARATOR '***') as `parent-ids`"
+                     . ", GROUP_CONCAT($tableParent.slug ORDER BY $tableParent.id ASC SEPARATOR '***') as `parent-slugs`"
+                     . ", GROUP_CONCAT($tableParent.type ORDER BY $tableParent.id ASC SEPARATOR '***') as `parent-types`"
+                     . ", GROUP_CONCAT($tableParent.source ORDER BY $tableParent.id ASC SEPARATOR '***') as `parent-sources`"
+                     . ", GROUP_CONCAT($tableParent.format ORDER BY $tableParent.id ASC SEPARATOR '***') as `parent-formats`"
+                )
+                    ->from($table)
+                    ->leftJoin($tableInput, $tableParentClause)
+                    ->where("$table.parent = 0")
+                    ->andWhere("$table.target = ?", $slug)
+                    ->group("$table.id")
+                    ->order("$table.id", "ASC")
+                ;
+
+                if ($limit > 0)
+                    $queryFetch->limit("$start, $limit");
+            } catch (\NG\Exception $e) {}
+
+            $data = $database->fetchAll($queryFetch);
+        }
+
+        return array(
+            "total" => $count,
+            "pages" => $pages,
+            "page" => $page,
+            "limit" => $limit,
+            "data" => $data,
+        );
+    }
+
     public function fetchChildren($parent, $limit = 10, $page = 1)
     {
         $database = $this->database;
@@ -256,57 +414,61 @@ class CmsInput
         );
     }
 
-    public function find($key, $limit = 10, $page = 1)
-    {
-        $database = $this->database;
-        $queryCount = new Query();
-        $queryFetch = new Query();
-        $table = $this->table;
-
-        $start = ($page - 1) * $limit;
-
-        try {
-            $queryCount->select("COUNT(*) AS rowCount")
-                ->from($table)
-                ->where("name LIKE ?", "%$key%")
-            ;
-        } catch (\NG\Exception $e) {}
-
-        $count = 0;
-        $row = $database->fetchRow($queryCount);
-        if (is_array($row)) {
-            $count = $row['rowCount'];
-        }
-
-        $pages = 0;
-        $data = null;
-
-        if (!empty($count)){
-            if ($limit > 0){
-                $pages = (int) ($count / $limit);
-                if (($count % $limit) > 0) $pages += 1;
+    public function setSource($source = "") {
+        $sources = null;
+        if ($source) {
+            $arrSource = explode("#", $source);
+            $key = "";
+            $slug = $arrSource[0];
+            if (count($arrSource) == 2) {
+                $key = $arrSource[0];
+                $slug = $arrSource[1];
             }
 
-            try {
-                $queryFetch->select("$table.*")
-                    ->from($table)
-                    ->where("$table.name LIKE ?", "%$key%")
-                    ->order("$table.id", "ASC");
+            if ($key == "meta") {
+                $database = $this->database;
+                $query = new Query();
 
-                if ($limit > 0)
-                    $queryFetch->limit("$start, $limit");
-            } catch (\NG\Exception $e) {}
+                $query->select("id")
+                    ->from("meta")
+                    ->where("slug = ?", $slug);
 
-            $data = $database->fetchAll($queryFetch);
+                $dataMeta = $database->fetchRow($query);
+
+                if ($dataMeta) {
+                    $idMeta = $dataMeta["id"];
+                    $query = new Query();
+                    $table = "meta_data";
+                    try {
+                        $query->select("value")
+                            ->from($table)
+                            ->where("idmeta = ?", $idMeta)
+                            ->order("num", "ASC")
+                        ;
+                    } catch (\NG\Exception $e) {}
+
+                    $dataMetaData = $database->fetchRow($query);
+                    if ($dataMetaData) {
+                        $sources = array();
+                        $num = 1;
+                        foreach ($dataMetaData as $itemMetaData) {
+                            $item = array("number" => $num, "value" => $itemMetaData);
+                            $sources[] = $item;
+                            $num++;
+                        }
+                    }
+                }
+            } else if ($key == "post") {
+
+            } else {
+                switch ($slug) {
+                    case "user":
+
+                        break;
+                }
+            }
         }
-
-        return array(
-            "total" => $count,
-            "pages" => $pages,
-            "page" => $page,
-            "limit" => $limit,
-            "data" => $data,
-        );
+        return $sources;
     }
 
     public function getById($value)

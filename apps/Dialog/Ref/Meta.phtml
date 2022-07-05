@@ -5,12 +5,39 @@ $config = $this->config;
 $helper = $this->helper;
 $viewAlert = isset($this->viewAlert) ? $this->viewAlert : "";
 $viewSuccess = isset($this->viewSuccess) ? $this->viewSuccess : "";
+$viewDataMeta = isset($this->viewDataMeta) ? $this->viewDataMeta : array();
 $viewDataMetaParent = isset($this->viewDataMetaParent) ? $this->viewDataMetaParent : "";
+$dataMeta = null;
+if ($viewDataMeta) {
+    $dataMeta = $helper->getArrayValue($viewDataMeta, "data");
+}
+
 $dataMetaParent = null;
 if ($viewDataMetaParent) {
     $dataMetaParent = $helper->getArrayValue($viewDataMetaParent, "data");
 }
 
+$viewDataCmsType = isset($this->viewDataCmsType) ? $this->viewDataCmsType : array();
+$dataCmsType = null;
+if ($viewDataCmsType) {
+    $dataCmsType = $helper->getArrayValue($viewDataCmsType, 'data');
+}
+$dataTarget = array(
+    array("id" => "user", "name" => "Pengguna"),
+    /*
+    array("id" => "all", "name" => "Semua"),
+    array("id" => "ref", "name" => "Referensi"),
+    array("id" => "posting", "name" => "Posting"),
+    array("id" => "letter", "name" => "Surat"),
+    */
+);
+if ($dataCmsType) {
+    foreach ($dataCmsType as $itemCmsType) {
+        $itemCmsType["id"] = "posting-" . $itemCmsType["slug"];
+        $itemCmsType["name"] = "Posting: " . $itemCmsType["name"];
+        $dataTarget[] = $itemCmsType;
+    }
+}
 ?>
 
 <div class="modal modal-danger fade" id="dialog-delete">
@@ -88,13 +115,6 @@ if ($viewDataMetaParent) {
                                 <select class="form-control select2bs4" id="add-target" name="add-target" data-type="select">
                                     <option value="">Tidak Ada</option>
                                     <?php
-                                    $dataTarget = array(
-                                        array("id" => "all", "name" => "Semua"),
-                                        array("id" => "ref", "name" => "Referensi"),
-                                        array("id" => "user", "name" => "Pengguna"),
-                                        array("id" => "posting", "name" => "Posting"),
-                                        array("id" => "letter", "name" => "Surat")
-                                    );
                                     foreach ($dataTarget as $itemTarget){
                                         $idTarget = $itemTarget["id"];
                                         $nameTarget = $itemTarget["name"];
@@ -106,8 +126,26 @@ if ($viewDataMetaParent) {
                                 </select>
                             </div>
                         </div>
-
-                        <div class="col-md-12">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="add-source" class="col-form-label">Sumber Data</label>
+                                <select class="form-control select2bs4" id="add-source" name="add-source" data-type="select">
+                                    <option value="">Tidak Ada</option>
+                                    <?php
+                                    if ($dataMeta) {
+                                        foreach ($dataMeta as $itemMeta){
+                                            $idSource = "meta#" . $itemMeta["slug"];
+                                            $nameSource = "Meta: " . $itemMeta["name"];
+                                            ?>
+                                            <option value="<?php echo $idSource ?>"><?php echo $nameSource ?></option>
+                                            <?php
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label for="add-parent" class="col-form-label">Kepala</label>
                                 <select class="form-control select2bs4" id="add-parent" name="add-parent" data-type="select">
@@ -195,13 +233,6 @@ if ($viewDataMetaParent) {
                                 <select class="form-control select2bs4" id="edit-target" name="edit-target" data-type="select" data-field="target">
                                     <option value="">Tidak Ada</option>
                                     <?php
-                                    $dataTarget = array(
-                                        array("id" => "all", "name" => "Semua"),
-                                        array("id" => "ref", "name" => "Referensi"),
-                                        array("id" => "user", "name" => "Pengguna"),
-                                        array("id" => "posting", "name" => "Posting"),
-                                        array("id" => "letter", "name" => "Surat")
-                                    );
                                     foreach ($dataTarget as $itemTarget){
                                         $idTarget = $itemTarget["id"];
                                         $nameTarget = $itemTarget["name"];
@@ -214,7 +245,26 @@ if ($viewDataMetaParent) {
                             </div>
                         </div>
 
-                        <div class="col-md-12">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="edit-source" class="col-form-label">Sumber Data</label>
+                                <select class="form-control select2bs4" id="edit-source" name="edit-source" data-type="select" data-field="source">
+                                    <option value="">Tidak Ada</option>
+                                    <?php
+                                    if ($dataMeta) {
+                                        foreach ($dataMeta as $itemMeta){
+                                            $idSource = "meta#" . $itemMeta["slug"];
+                                            $nameSource = "Meta: " . $itemMeta["name"];
+                                            ?>
+                                            <option value="<?php echo $idSource ?>"><?php echo $nameSource ?></option>
+                                            <?php
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label for="edit-parent" class="col-form-label">Kepala</label>
                                 <select class="form-control select2bs4" id="edit-parent" name="edit-parent" data-type="select" data-field="parent">

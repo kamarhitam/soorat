@@ -81,8 +81,7 @@
         "id": "411000",
         "text": "Tipe",
         "icon": "paste",
-        "path": "cms/tipe",
-        "hidden": true
+        "path": "cms/tipe"
     },
     {
         "id": "412000",
@@ -115,12 +114,18 @@
     },
     {
         "id": "510000",
-        "text": "Surat"
+        "text": "Data"
     },
     {
-        "id": "515000",
-        "text": "Daftar Surat",
+        "id": "511000",
+        "text": "Form",
         "icon": "edit",
-        "path": "surat"
+        "path": "data/form"
+    },
+    {
+        "id": "512000",
+        "text": "Surat",
+        "icon": "edit",
+        "path": "data/surat"
     }
 ]

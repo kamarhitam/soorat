@@ -20,14 +20,19 @@ function setInput(key, value){
     let el = $("[data-field='" + key +"']");
     if (el.prop("tagName") === "SELECT"){
         if (el.hasClass("select2bs4")){
-            /*alert(el.attr("id") + ":" + key);*/
             if (el.hasClass("selectx")){
-                /*alert(value);*/
                 el.append('<option value="'+ value + '">' + value +'</option>');
                 el.select2();
             }
-            if (value !== "0")
-                el.val(value).trigger('change');
+            if (value !== "0") {
+                const values = value.split('***');
+                /*
+                el.select2({
+                    val: values
+                });
+                */
+                el.val(values).trigger('change');
+            }
         } else {
             el.val(value);
         }

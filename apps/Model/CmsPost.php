@@ -66,135 +66,18 @@ class CmsPost
         return $database->query($query);
     }
 
-    public function fetch($limit = 10, $page = 1)
+    public function fetch($type, $limit = 10, $page = 1)
     {
         $database = $this->database;
         $queryCount = new Query();
         $queryFetch = new Query();
-        $table = $this->table;
-
-        $start = ($page - 1) * $limit;
-
-        try {
-            $queryCount->select("COUNT($table.id) AS rowCount")
-                ->from($table);
-        } catch (\NG\Exception $e) {}
-
-        $count = 0;
-        $row = $database->fetchRow($queryCount);
-        if (is_array($row)) {
-            $count = $row['rowCount'];
-        }
-
-        $pages = 0;
-        $data = null;
-
-        if (!empty($count)){
-            if ($limit > 0){
-                $pages = (int) ($count / $limit);
-                if (($count % $limit) > 0) $pages += 1;
-            } else {
-                $pages = 1;
-            }
-
-            try {
-                $queryFetch->select("$table.*")
-                    ->from($table);
-                $queryFetch
-                    ->order("$table.type","ASC")
-                    ->order("$table.slug","ASC")
-                    ->order("$table.id", "ASC");
-                if ($limit > 0)
-                    $queryFetch->limit("$start, $limit");
-            } catch (\NG\Exception $e) {}
-
-            $rows = $database->fetchAll($queryFetch);
-            if ($rows){
-                $data = $rows;
-                /*
-                $clsPostMeta = new CmsPostMeta();
-                $helper = new Helper();
-
-                foreach ($rows as $row){
-                    $postid = $row["id"];
-                    $content = $row["content"];
-
-                    $excerpt = $helper->getExcerpt($content);
-                    $row["excerpt"] = $excerpt;
-
-                    $posttype = $row["type"];
-                    $typeslug = $row["typeslug"];
-                    $typetext = $row["typetext"];
-                    $typeparent = $row["typeparent"];
-
-                    unset($row["typeslug"]);
-                    unset($row["typetext"]);
-                    unset($row["typeparent"]);
-
-                    $row["type"] = array(
-                        "id" => $posttype,
-                        "slug" => $typeslug,
-                        "name" => $typetext,
-                        "parent" => $typeparent,
-                    );
-
-                    $meta = $clsPostMeta->fetchByPostId($postid);
-
-                    if ($meta){
-                        $dataMeta = $meta["data"];
-                        if ($dataMeta){
-                            foreach ($dataMeta as $itemMeta){
-                                $metaType = $itemMeta["type"];
-                                $metaValue = $itemMeta["value"];
-                                if ($metaType == 2){
-                                    $metaSlug = $itemMeta["categoryslug"];
-                                    $metaName = $itemMeta["categoryname"];
-                                    $metaCat = array(
-                                        "id" => $metaValue,
-                                        "slug" => $metaSlug,
-                                        "name" => $metaName,
-                                    );
-                                    $row["categories"][] = $metaCat;
-                                } else if ($metaType == 3){
-                                    $metaSlug = $itemMeta["tagslug"];
-                                    $metaName = $itemMeta["tagname"];
-                                    $metaTag = array(
-                                        "id" => $metaValue,
-                                        "slug" => $metaSlug,
-                                        "name" => $metaName,
-                                    );
-                                    $row["tags"][] = $metaTag;
-                                }
-                            }
-                        }
-                    }
-                    $data[] = $row;
-                }
-                */
-            }
-        }
-
-        return array(
-            "total" => $count,
-            "pages" => $pages,
-            "page" => $page,
-            "limit" => $limit,
-            "data" => $data,
-        );
-    }
-
-    public function fetchByType($type, $limit = 10, $page = 1)
-    {
-        $database = $this->database;
-        $queryCount = new Query();
-        $queryFetch = new Query();
+        $queryType = new Query();
         $table = $this->table;
 
         $start = ($page - 1) * $limit;
 
         $count = 0;
         $pages = 0;
-        $mode = 0;
         $data = null;
 
         try {
@@ -216,11 +99,103 @@ class CmsPost
                 $pages = 1;
             }
 
+            $tableDetail = 'detail';
+            $tableDetailClause = "$table.id = $tableDetail.idtarget AND $tableDetail.target = 'posting'";
+
             try {
-                $queryFetch->select("$table.*")
+                $queryFetch->select(
+                    "$table.*"
+                    . ", GROUP_CONCAT($tableDetail.key ORDER BY $tableDetail.id ASC SEPARATOR '***') as `detail-keys`"
+                    . ", GROUP_CONCAT($tableDetail.value ORDER BY $tableDetail.id ASC SEPARATOR '***') as `detail-values`"
+                )
                     ->from($table)
+                    ->leftJoin($tableDetail, $tableDetailClause)
                     ->where("$table.type = ?", $type);
+
                 $queryFetch
+                    ->group("$tableDetail.`id`, $table.`id`")
+                    ->order("$table.type","ASC")
+                    ->order("$table.slug","ASC")
+                    ->order("$table.id", "ASC");
+                if ($limit > 0)
+                    $queryFetch->limit("$start, $limit");
+
+            } catch (\NG\Exception $e) {}
+
+            $data = $database->fetchAll($queryFetch);
+        }
+
+        return array(
+            "total" => $count,
+            "pages" => $pages,
+            "page" => $page,
+            "limit" => $limit,
+            "data" => $data,
+        );
+    }
+
+    public function fetchByType($slug, $limit = 10, $page = 1)
+    {
+        $database = $this->database;
+        $queryCount = new Query();
+        $queryFetch = new Query();
+        $queryType = new Query();
+        $table = $this->table;
+
+        $start = ($page - 1) * $limit;
+
+        $count = 0;
+        $pages = 0;
+        $type = 0;
+        $data = null;
+
+        $tableType = 'cms_type';
+        try {
+            $queryType->select("id")
+                ->from($tableType)
+                ->where("slug = ?", $slug);
+        } catch (\NG\Exception $e) {}
+
+        $row = $database->fetchRow($queryType);
+
+        if ($row) {
+            $type = $row["id"];
+        }
+
+        try {
+            $queryCount->select("COUNT($table.id) AS rowCount")
+                ->from($table)
+                ->where("$table.type = ?", $type);
+        } catch (\NG\Exception $e) {}
+
+        $row = $database->fetchRow($queryCount);
+        if (is_array($row)) {
+            $count = $row['rowCount'];
+        }
+
+        if (!empty($count)){
+            if ($limit > 0){
+                $pages = (int) ($count / $limit);
+                if (($count % $limit) > 0) $pages += 1;
+            } else {
+                $pages = 1;
+            }
+
+            $tableDetail = 'detail';
+            $tableDetailClause = "$table.id = $tableDetail.idtarget AND $tableDetail.target = 'posting'";
+
+            try {
+                $queryFetch->select(
+                    "$table.*"
+                     . ", GROUP_CONCAT($tableDetail.key ORDER BY $tableDetail.id ASC SEPARATOR '***') as `detail-keys`"
+                     . ", GROUP_CONCAT($tableDetail.value ORDER BY $tableDetail.id ASC SEPARATOR '***') as `detail-values`"
+                )
+                    ->from($table)
+                    ->leftJoin($tableDetail, $tableDetailClause)
+                    ->where("$table.type = ?", $type);
+
+                $queryFetch
+                    ->group("$tableDetail.`id`, $table.`id`")
                     ->order("$table.type","ASC")
                     ->order("$table.slug","ASC")
                     ->order("$table.id", "ASC");
@@ -502,101 +477,6 @@ class CmsPost
         } catch (\NG\Exception $e) {}
 
         return $database->fetchRow($query);
-    }
-
-    public function fetchSimple($type, $slug, $limit = 10, $page = 1)
-    {
-        $database = $this->database;
-        $queryCount = new Query();
-        $queryFetch = new Query();
-        $table = $this->table;
-
-        $start = ($page - 1) * $limit;
-
-        $tablePostMeta = 'cms_post_meta';
-        $tablePostMetaClause = "$table.id = $tablePostMeta.postid";
-
-        $tableMeta = 'cms_meta';
-        $tableMetaClause = "$tableMeta.id = $tablePostMeta.value";
-
-        $count = 0;
-        $pages = 0;
-        $mode = 0;
-        $data = null;
-
-        try {
-            $queryCount->select("COUNT($table.id) AS rowCount")
-                ->from($table)
-                ->innerJoin($tablePostMeta, $tablePostMetaClause)
-                ->innerJoin($tableMeta, $tableMetaClause)
-                ->where("$tableMeta.type = ?", $type)
-                ->andWhere("$tableMeta.slug = ?", $slug);
-        } catch (\NG\Exception $e) {}
-
-        $row = $database->fetchRow($queryCount);
-        if (is_array($row)) {
-            $count = $row['rowCount'];
-        }
-
-        if (empty($count)){
-            try {
-                $queryCount->select("COUNT($table.id) AS rowCount")
-                    ->from($table)
-                    ->innerJoin($tablePostMeta, $tablePostMetaClause)
-                    ->innerJoin($tableMeta, $tableMetaClause)
-                    ->where("$tableMeta.type = ?", $type)
-                    ->andWhere("$tableMeta.id = ?", $slug);
-            } catch (\NG\Exception $e) {}
-
-            $row = $database->fetchRow($queryCount);
-            if (is_array($row)) {
-                $count = $row['rowCount'];
-            }
-            $mode = 1;
-        }
-
-        if (!empty($count)){
-            if ($limit > 0){
-                $pages = (int) ($count / $limit);
-                if (($count % $limit) > 0) $pages += 1;
-            } else {
-                $pages = 1;
-            }
-
-            try {
-                $queryFetch->select("$table.id, $table.type, $table.title, $table.slug" .
-                    ", IFNULL($tableMeta.name, '') AS typetext" .
-                    ", IFNULL($tableMeta.slug, '') AS typeslug"
-                )
-                    ->from($table)
-                    ->leftJoin($tablePostMeta, $tablePostMetaClause)
-                    ->leftJoin($tableMeta, $tableMetaClause)
-                    ->where("$tableMeta.type = ?", $type);
-
-                if ($mode == 1){
-                    $queryFetch->andWhere("$tableMeta.id = ?", $slug);
-                } else {
-                    $queryFetch->andWhere("$tableMeta.slug = ?", $slug);
-                }
-                $queryFetch
-                    ->order("$table.type","ASC")
-                    ->order("$table.slug","ASC")
-                    ->order("$table.id", "ASC");
-                if ($limit > 0)
-                    $queryFetch->limit("$start, $limit");
-
-            } catch (\NG\Exception $e) {}
-
-            $data = $database->fetchAll($queryFetch);
-        }
-
-        return array(
-            "total" => $count,
-            "pages" => $pages,
-            "page" => $page,
-            "limit" => $limit,
-            "data" => $data,
-        );
     }
 
     public function getCountByType($type)

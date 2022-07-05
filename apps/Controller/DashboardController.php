@@ -140,16 +140,16 @@ class DashboardController extends NG\Controller {
             );
         }
         $cls = new CmsPost();
-        $countPostType = $cls->getCountByType(2);
+        $countPostLetter = $cls->getCountByType(2);
 
-        $cls = new Letter();
-        $countLetter = $cls->getCount();
+        $cls = new CmsPost();
+        $countPostForm = $cls->getCountByType(3);
 
         $cls = new CmsGallery();
         $countGallery = $cls->getCount();
 
-        $this->view->viewCountPostType = $countPostType;
-        $this->view->viewCountLetter = $countLetter;
+        $this->view->viewCountLetter = $countPostLetter;
+        $this->view->viewCountForm = $countPostForm;
         $this->view->viewCountGallery = $countGallery;
 
         $this->view->viewActiveMenu = $activeMenu;

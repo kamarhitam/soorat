@@ -9,6 +9,8 @@ $controllerPath = Registry::get('controllerPath');
 $controllerName = Registry::get('controllerName');
 $viewData = isset($this->viewData) ? $this->viewData : array();
 
+$viewFilterType = isset($this->viewFilterType) ? $this->viewFilterType : 1;
+
 $viewAction = isset($this->viewAction) ? $this->viewAction : "";
 $viewAction = strtolower($viewAction);
 
@@ -21,15 +23,56 @@ if ($viewDataMeta) {
     $dataMeta = $helper->getArrayValue($viewDataMeta, "data");
 }
 
-$editURL = $baseUrl . strtolower($controllerPath) . "/$viewAction/edit";
+$viewDataType = isset($this->viewDataType) ? $this->viewDataType : array();
+$dataType = null;
+if ($viewDataType) {
+    $dataType = $helper->getArrayValue($viewDataType, "data");
+}
+
+$editURL = $baseUrl . strtolower($controllerPath) . "/$viewAction/$viewFilterType/edit";
 ?>
 <div class="row">
     <div class="col-md-12">
         <div class="card">
             <div class="card-body">
-                <a href="<?php echo $baseUrl . "$controllerPath/$viewAction/baru" ?>" class="btn waves-effect waves-light btn-success">
-                    <i class="fas fa-plus-circle"></i>&nbsp; Tambah Data
-                </a>
+                <div class="form-inline">
+                    <div class="form-group">
+                        <a href="<?php echo $baseUrl . "$controllerPath/$viewAction/$viewFilterType/baru" ?>" class="btn waves-effect waves-light btn-success">
+                            <i class="fas fa-plus-circle"></i>&nbsp; Tambah Data
+                        </a>
+                    </div>
+                    <form role="form" method="post" class="form-inline mx-sm-3">
+                        <div class="form-group mx-sm-3">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <label for="filter-type" class="input-group-text">Jenis</label>
+                                </div>
+                                <div class="input-group-append">
+                                    <select class="form-control select2bs4" id="filter-type" name="filter-type">
+                                        <?php
+                                        foreach ($dataType as $itemType){
+                                            $selected = "";
+                                            $idType = $itemType["id"];
+                                            $nameType = $itemType["name"];
+                                            if ($viewFilterType == $idType) $selected = "selected";
+                                            ?>
+                                            <option value="<?php echo $idType ?>" <?php echo $selected ?>><?php echo $nameType ?></option>
+                                            <?php
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group mx-sm-3">
+                            <div class="input-group">
+                                <button type="submit" name="action" class="btn btn-warning" value="filter">
+                                    <i class="fas fa-filter"></i>&nbsp; Tampilkan
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -93,13 +136,13 @@ $editURL = $baseUrl . strtolower($controllerPath) . "/$viewAction/edit";
                                             }
 
                                             $typeName = "";
-                                            switch ($type) {
-                                                case 1:
-                                                    $typeName = "Template";
-                                                    break;
-                                                case 2:
-                                                    $typeName = "Surat";
-                                                    break;
+                                            if ($type) {
+                                                foreach ($dataType as $itemType) {
+                                                    if ($type == $itemType["id"]) {
+                                                        $typeName = $itemType["name"];
+                                                        break;
+                                                    }
+                                                }
                                             }
 
                                             $item["DT_RowId"] = $id;

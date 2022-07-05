@@ -64,7 +64,6 @@ class DBHelper
                 foreach ($menus as $menu){
                     $id = $helper->getArrayValue($menu, "id");
                     $children = $helper->getArrayValue($menu, "children");
-                    // $parent = $helper->getArrayValue($menu, "parent");
                     $text = $helper->getArrayValue($menu, "text");
                     if (!$children){
                         $i = 0;
@@ -73,11 +72,6 @@ class DBHelper
                             $actionType = $actionTypes[$i];
 
                             $nameRole = "$actionType $text";
-                            /*
-                            if ($parent == $text){
-                                $nameRole = "$actionType $text";
-                            }
-                            */
                             if (empty($parent)){
                                 $nameRole = "$actionType $text";
                             }
@@ -91,27 +85,23 @@ class DBHelper
             case "meta":
                 $cls = new Meta();
                 $cls->insert(array("id" => 1, "type" => "text", "target" => "constant",
-                    "name" => "Nama Instansi", "slug" => "nama-instansi", "parent" => '0'));
+                    "name" => "Nama Instansi", "slug" => "nama-instansi", "parent" => '0', "source" => ""));
                 $cls->insert(array("id" => 2, "type" => "text", "target" => "constant",
-                    "name" => "Alamat Instansi (1)", "slug" => "alamat-instansi-1", "parent" => '0'));
+                    "name" => "Alamat Instansi (1)", "slug" => "alamat-instansi-1", "parent" => '0', "source" => ""));
                 $cls->insert(array("id" => 3, "type" => "text", "target" => "constant",
-                    "name" => "Alamat Instansi (2)", "slug" => "alamat-instansi-2", "parent" => '0'));
+                    "name" => "Alamat Instansi (2)", "slug" => "alamat-instansi-2", "parent" => '0', "source" => ""));
                 $cls->insert(array("id" => 4, "type" => "text", "target" => "constant",
-                    "name" => "Kota Instansi", "slug" => "kota-instansi", "parent" => '0'));
+                    "name" => "Kota Instansi", "slug" => "kota-instansi", "parent" => '0', "source" => ""));
                 $cls->insert(array("id" => 5, "type" => "text", "target" => "constant",
-                    "name" => "Kode Pos Instansi", "slug" => "kode-pos-instansi", "parent" => '0'));
+                    "name" => "Kode Pos Instansi", "slug" => "kode-pos-instansi", "parent" => '0', "source" => ""));
                 $cls->insert(array("id" => 6, "type" => "text", "target" => "constant",
-                    "name" => "Telepon Instansi (1)", "slug" => "telepon-instansi-1", "parent" => '0'));
+                    "name" => "Telepon Instansi (1)", "slug" => "telepon-instansi-1", "parent" => '0', "source" => ""));
                 $cls->insert(array("id" => 7, "type" => "text", "target" => "constant",
-                    "name" => "Telepon Instansi (2)", "slug" => "telepon-instansi-2", "parent" => '0'));
+                    "name" => "Telepon Instansi (2)", "slug" => "telepon-instansi-2", "parent" => '0', "source" => ""));
                 $cls->insert(array("id" => 8, "type" => "text", "target" => "constant",
-                    "name" => "Tanggal Pemasangan", "slug" => "tanggal-pemasangan", "parent" => '0'));
+                    "name" => "Tanggal Pemasangan", "slug" => "tanggal-pemasangan", "parent" => '0', "source" => ""));
                 $cls->insert(array("id" => 9, "type" => "select", "target" => "",
-                    "name" => "Pengembang", "slug" => "pengembang", "parent" => '0'));
-                $cls->insert(array("id" => 10, "type" => "text", "target" => "",
-                    "name" => "Nama", "slug" => "pengembang-nama", "parent" => 9));
-                $cls->insert(array("id" => 11, "type" => "text", "target" => "",
-                    "name" => "Jabatan", "slug" => "pengembang-jabatan", "parent" => 9));
+                    "name" => "Jabatan", "slug" => "jabatan", "parent" => '0', "source" => ""));
                 break;
             case "meta_data":
                 $cls = new MetaData();
@@ -124,8 +114,7 @@ class DBHelper
                 $cls->insert(array("idmeta" => 6, "num" => "0", "value" => "08988543210"));
                 $cls->insert(array("idmeta" => 7, "num" => "0", "value" => "0231-123456"));
                 $cls->insert(array("idmeta" => 8, "num" => "0", "value" => $installDate));
-                $cls->insert(array("idmeta" => 10, "num" => 1, "value" => "Agung Novian"));
-                $cls->insert(array("idmeta" => 11, "num" => 1, "value" => "Ketua"));
+                $cls->insert(array("idmeta" => 9, "num" => "1", "value" => "Ketua"));
                 break;
             case "gallery":
                 $installDate = date("Y-m-d");
@@ -143,6 +132,12 @@ class DBHelper
                 @copy($oldImage, $newImage);
                 $cls->insert(array("date" => $installDate, "code" => $fileCode, "name" => "logo", "ext" => "png"));
                 break;
+            case "cms_type":
+                $cls = new CmsType();
+                $cls->insert(array("id" => 1, "name" => "Template", "slug" => "template"));
+                $cls->insert(array("id" => 2, "name" => "Surat", "slug" => "surat"));
+                $cls->insert(array("id" => 3, "name" => "Form", "slug" => "form"));
+                break;
             case "post":
                 $cls = new CmsPost();
                 $cls->insert(array("id" => 1, "type" => 1, "title" => "Header 1", "slug" => "header-1",
@@ -151,68 +146,88 @@ class DBHelper
                     "date" => date("Y-m-d H:i:s"), "content" => $this->putTemplate('sign-1')));
                 $cls->insert(array("id" => 3, "type" => 1, "title" => "Footer 1", "slug" => "footer-1",
                     "date" => date("Y-m-d H:i:s"), "content" => $this->putTemplate('footer-1')));
-                $cls->insert(array("id" => 4, "type" => 2, "title" => "Ucapan Selamat Datang", "slug" => "ucapan-selamat-datang",
+
+                $cls->insert(array("id" => 4, "type" => 3, "title" => "Pengembang", "slug" => "pengembang",
+                    "date" => date("Y-m-d H:i:s"), "content" => "Daftar Pengembang"));
+                $cls->insert(array("id" => 5, "type" => 2, "title" => "Ucapan Selamat Datang", "slug" => "ucapan-selamat-datang",
                     "date" => date("Y-m-d H:i:s"), "content" => $this->putTemplate('ucapan-selamat-datang')));
                 break;
             case "input":
                 $cls = new CmsInput();
-                $cls->insert(array("id" => 1, "type" => "auto-number", "title" => "Nomor Surat", "slug" => "nomor-surat",
-                    "source" => "", "format" => "0000", "parent" => 0));
-                $cls->insert(array("id" => 2, "type" => "text", "title" => "Jenis Surat", "slug" => "jenis-surat",
-                    "source" => "", "format" => "ucase", "parent" => 1));
-                $cls->insert(array("id" => 3, "type" => "select", "title" => "Bulan Surat", "slug" => "bulan-surat",
-                    "source" => "month", "format" => "roman", "parent" => 1));
-                $cls->insert(array("id" => 4, "type" => "select", "title" => "Tahun Surat", "slug" => "tahun-surat",
-                    "source" => "year", "format" => "", "parent" => 1));
-                $cls->insert(array("id" => 5, "type" => "text", "title" => "Judul Surat", "slug" => "judul-surat",
-                    "source" => "", "format" => "", "parent" => 0));
-                $cls->insert(array("id" => 6, "type" => "date", "title" => "Tanggal Surat", "slug" => "tanggal-surat",
-                    "source" => "", "format" => "", "parent" => 0));
-                $cls->insert(array("id" => 7, "type" => "select", "title" => "Pengembang", "slug" => "pengembang",
-                    "source" => "meta#pengembang", "format" => "", "parent" => 0));
+                $cls->insert(array("id" => 1, "type" => "auto-number", "title" => "Nomor", "slug" => "surat-nomor",
+                    "source" => "", "format" => "0000", "parent" => 0, "target" => "surat"));
+                $cls->insert(array("id" => 2, "type" => "text", "title" => "Jenis", "slug" => "surat-jenis",
+                    "source" => "", "format" => "ucase", "parent" => 1, "target" => "surat"));
+                $cls->insert(array("id" => 3, "type" => "select", "title" => "Bulan", "slug" => "surat-bulan",
+                    "source" => "month", "format" => "roman", "parent" => 1, "target" => "surat"));
+                $cls->insert(array("id" => 4, "type" => "select", "title" => "Tahun", "slug" => "surat-tahun",
+                    "source" => "year", "format" => "", "parent" => 1, "target" => "surat"));
+                $cls->insert(array("id" => 5, "type" => "text", "title" => "Judul", "slug" => "surat-judul",
+                    "source" => "", "format" => "", "parent" => 0, "target" => "surat"));
+                $cls->insert(array("id" => 6, "type" => "date", "title" => "Tanggal", "slug" => "surat-tanggal",
+                    "source" => "", "format" => "", "parent" => 0, "target" => "surat"));
+                $cls->insert(array("id" => 7, "type" => "select", "title" => "Pengembang", "slug" => "surat-pengembang",
+                    "source" => "post#pengembang", "format" => "", "parent" => 0, "target" => "surat"));
+
+                $cls->insert(array("id" => 8, "type" => "text", "title" => "Nama", "slug" => "form-nama",
+                    "source" => "", "format" => "", "parent" => 0, "target" => "form"));
+                $cls->insert(array("id" => 9, "type" => "select", "title" => "Jabatan", "slug" => "form-jabatan",
+                    "source" => "meta#jabatan", "format" => "", "parent" => 0, "target" => "form"));
                 break;
             case "post_input":
                 $cls = new CmsPostInput();
-                $cls->insert(array("idpost" => 4, "idinput" => 1, "num" => 1));
-                /*
-                $cls->insert(array("idpost" => 4, "idinput" => 2, "num" => 2));
-                $cls->insert(array("idpost" => 4, "idinput" => 3, "num" => 3));
-                $cls->insert(array("idpost" => 4, "idinput" => 4, "num" => 4));
-                */
-                $cls->insert(array("idpost" => 4, "idinput" => 5, "num" => 2));
-                $cls->insert(array("idpost" => 4, "idinput" => 6, "num" => 3));
-                $cls->insert(array("idpost" => 4, "idinput" => 7, "num" => 4));
+                $cls->insert(array("idpost" => 4, "idinput" => 8, "num" => 1));
+                $cls->insert(array("idpost" => 4, "idinput" => 9, "num" => 2));
+
+                $cls->insert(array("idpost" => 5, "idinput" => 1, "num" => 1));
+                $cls->insert(array("idpost" => 5, "idinput" => 5, "num" => 2));
+                $cls->insert(array("idpost" => 5, "idinput" => 6, "num" => 3));
+                $cls->insert(array("idpost" => 5, "idinput" => 7, "num" => 4));
                 break;
-            case "letter":
+            case "post_data":
                 $installDate = date("Y-m-d H:i:s");
-                $cls = new Letter();
-                $prefixCode = "LTR";
+                $cls = new PostData();
+                $prefixCode = "FRM";
                 $postId = 4;
                 $code = $helper->generateKey($prefixCode . sprintf('%04d', $postId), 13);
-                $cls->insert(array("idpost" => $postId, "code" => $code, "createdate" => $installDate, "createby" => 1));
+                $cls->insert(array("type" => 3, "idpost" => $postId, "code" => $code, "createdate" => $installDate, "createby" => 1));
+
+                $installDate = date("Y-m-d H:i:s");
+                $cls = new PostData();
+                $prefixCode = "LTR";
+                $postId = 5;
+                $code = $helper->generateKey($prefixCode . sprintf('%04d', $postId), 13);
+                $cls->insert(array("type" => 2, "idpost" => $postId, "code" => $code, "createdate" => $installDate, "createby" => 1));
                 break;
             case "detail":
                 $cls = new Detail();
                 $installDate = date("d-m-Y");
                 $year = date("Y");
                 $month = date("m");
-                $cls->insert(array("idtarget" => 1, "target" => "letter",
-                    "key" => "judul-surat", "value" => "Ucapan Selamat Datang"));
-                $cls->insert(array("idtarget" => 1, "target" => "letter",
-                    "key" => "nomor-surat", "value" => 1));
-                $cls->insert(array("idtarget" => 1, "target" => "letter",
-                    "key" => "jenis-surat", "value" => "SD"));
-                $cls->insert(array("idtarget" => 1, "target" => "letter",
-                    "key" => "bulan-surat", "value" => (int) $month));
-                $cls->insert(array("idtarget" => 1, "target" => "letter",
-                    "key" => "tahun-surat", "value" => (int) $year));
-                $cls->insert(array("idtarget" => 1, "target" => "letter",
-                    "key" => "pengembang", "value" => "[meta#pengembang:1#9]"));
-                $cls->insert(array("idtarget" => 1, "target" => "letter",
-                    "key" => "tanggal-surat", "value" => $installDate));
+
+                $cls->insert(array("idtarget" => 1, "target" => "data",
+                    "key" => "form-nama", "value" => "Agung Novian"));
+                $cls->insert(array("idtarget" => 1, "target" => "data",
+                    "key" => "form-jabatan", "value" => "[meta#jabatan:9]"));
+
+                $cls->insert(array("idtarget" => 2, "target" => "data",
+                    "key" => "surat-judul", "value" => "Ucapan Selamat Datang"));
+                $cls->insert(array("idtarget" => 2, "target" => "data",
+                    "key" => "surat-nomor", "value" => 1));
+                $cls->insert(array("idtarget" => 2, "target" => "data",
+                    "key" => "surat-jenis", "value" => "SD"));
+                $cls->insert(array("idtarget" => 2, "target" => "data",
+                    "key" => "surat-bulan", "value" => (int) $month));
+                $cls->insert(array("idtarget" => 2, "target" => "data",
+                    "key" => "surat-tahun", "value" => (int) $year));
+                $cls->insert(array("idtarget" => 2, "target" => "data",
+                    "key" => "surat-tanggal", "value" => $installDate));
+                $cls->insert(array("idtarget" => 2, "target" => "data",
+                    "key" => "surat-pengembang", "value" => "[post#pengembang:1]"));
                 break;
         }
     }
+
     private function putTemplate($slug){
         $content = "";
         $path = ROOT . DS . APPS . DS . "Template" . DS . "Post" . DS . "$slug.html";

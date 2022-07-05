@@ -1,13 +1,75 @@
 <?php
-    $session = $this->session;
-    $cookie = $this->cookie;
-    $cache = $this->cache;
+
+use NG\Uri;
+
+$helper = new Helper();
+$render = new Render();
+
+$viewTitle = isset($this->viewTitle) ? $this->viewTitle : "";
+$viewDescription = isset($this->viewDescription) ? $this->viewDescription : "";
+$viewImage = isset($this->viewImage) ? $this->viewImage : "";
+$viewKeywords = isset($this->viewKeywords) ? $this->viewKeywords : "";
+$baseUrl = Uri::baseUrl();
+$config = $this->config;
+
+$siteName = $helper->getArrayValue($config, "SITE_NAME");
+$siteTitle = $helper->getArrayValue($config, "SITE_TITLE");
+
+$viewDataTeam = isset($this->viewDataTeam) ? $this->viewDataTeam : array();
+$viewDataGallery = isset($this->viewDataGallery) ? $this->viewDataGallery : array();
+$viewDataFaq = isset($this->viewDataFaq) ? $this->viewDataFaq : array();
+
+$dataTeam = null;
+$dataGallery = null;
+$dataFaq = null;
+
+if ($viewDataTeam) {
+    $dataTeam = $helper->getArrayValue($viewDataTeam, "data");
+}
+if ($viewDataGallery) {
+    $dataGallery = $helper->getArrayValue($viewDataGallery, "data");
+}
+if ($viewDataFaq) {
+    $dataFaq = $helper->getArrayValue($viewDataFaq, "data");
+}
 ?>
 
-<div class="card">
-    <div class="card-body">
-        <div class="row">
+<!-- ======= Topbar ======= -->
+<?php echo $render->childRender($this->section("topbar"), null); ?>
 
-        </div>
-    </div>
-</div>
+<!-- ======= Header ======= -->
+<?php echo $render->childRender($this->section("header"), null); ?>
+
+<!-- ======= Home Section ======= -->
+<?php echo $render->childRender($this->section("home"), null); ?>
+
+<main id="main">
+    <!-- ======= Feature Section ======= -->
+    <?php echo $render->childRender($this->section("feature"), null); ?>
+
+    <!-- ======= About Section ======= -->
+    <?php echo $render->childRender($this->section("about"), null); ?>
+
+    <!-- ======= Skill Section ======= -->
+    <?php // $this->section("skill"); ?>
+
+    <!-- ======= Services Section ======= -->
+    <?php echo $render->childRender($this->section("service"), null); ?>
+
+    <!-- ======= Team Section ======= -->
+    <?php if ($dataTeam) echo $render->childRender($this->section("team"), null); ?>
+
+    <!-- ======= Portfolio Section ======= -->
+    <?php
+    if ($dataGallery) echo $render->childRender($this->section("portfolio"), null);
+    ?>
+
+    <!-- ======= Faq Section ======= -->
+    <?php if ($dataFaq) echo $render->childRender($this->section("faq"), null); ?>
+
+    <!-- ======= Contact Section ======= -->
+    <?php echo $this->section("contact"); ?>
+</main><!-- End #main -->
+
+<!-- ======= Footer ======= -->
+<?php echo $this->section("footer"); ?>

@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS `meta` (
   `target` varchar(20),
   `slug` varchar(100),
   `name` varchar(100),
+  `source` varchar(200),
   `parent` int(11),
   UNIQUE KEY `ref_meta_unique` (`type`, `target`, `slug`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

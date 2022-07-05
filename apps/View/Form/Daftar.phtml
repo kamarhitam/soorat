@@ -1,0 +1,421 @@
+<?php
+
+use NG\Registry;
+use NG\Uri;
+$helper = $this->helper;
+$baseUrl = Uri::baseUrl();
+$config = Registry::get('config');
+$controllerPath = Registry::get('controllerPath');
+$controllerName = Registry::get('controllerName');
+$viewData = isset($this->viewData) ? $this->viewData : array();
+$viewDataInput = isset($this->viewDataInput) ? $this->viewDataInput : array();
+$viewDataMeta = isset($this->viewDataMeta) ? $this->viewDataMeta : array();
+
+$viewAction = isset($this->viewAction) ? $this->viewAction : "";
+$viewId = isset($this->viewId) ? $this->viewId : 0;
+
+$viewAlert = isset($this->viewAlert) ? $this->viewAlert : "";
+$viewSuccess = isset($this->viewSuccess) ? $this->viewSuccess : "";
+$viewFilterYear = isset($this->viewFilterYear) ? $this->viewFilterYear : 0;
+$viewFilterMonth = isset($this->viewFilterMonth) ? $this->viewFilterMonth : 0;
+
+$dataInput = null;
+$dataInputForm = null;
+$dataMeta = null;
+
+if ($viewDataInput) {
+    $dataInput = $helper->getArrayValue($viewDataInput, 'data');
+}
+if ($viewDataMeta) {
+    $dataMeta = $helper->getArrayValue($viewDataMeta, 'data');
+}
+
+$arrayMonth = array(
+    "Semua Bulan",
+    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+);
+
+$allInput = array();
+if ($dataMeta) {
+    foreach ($dataMeta as $item) {
+        $item["title"] = $item["name"];
+        $item["source"] = "";
+        $itemType = $item["type"];
+        $itemSlug = $item["slug"];
+        if (in_array($itemType, array('select', 'multi-select'))){
+            $item["source"] = "meta#$itemSlug";
+        }
+        $allInput[] = array('input' => $item);
+    }
+}
+if ($dataInput) {
+    foreach ($dataInput as $item) {
+        $allInput[] = $item;
+    }
+}
+
+$listURL = $baseUrl . strtolower($controllerPath) . "/" . strtolower($viewAction);
+$printURL = $baseUrl . "cetak/laporan/form/$viewId";
+
+if ($viewFilterYear) {
+    $printURL .= "/$viewFilterYear";
+    if ($viewFilterMonth) {
+        $printURL .= "/$viewFilterMonth";
+    }
+}
+
+?>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="form-inline">
+
+                    <div class="form-group">
+                        <button data-toggle="modal" data-target="#dialog-add" class="btn waves-effect waves-light btn-success">
+                            <i class="fas fa-plus-circle"></i>&nbsp; Tambah Data
+                        </button>
+                    </div>
+                    <form role="form" method="post" class="form-inline mx-sm-3">
+                        <div class="form-group mx-sm-3">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <label for="filter-month" class="input-group-text">Bulan</label>
+                                </div>
+                                <div class="input-group-append">
+                                    <select class="form-control select2bs4" id="filter-month" name="filter-month">
+                                        <?php
+                                        for ($i = 0; $i < count($arrayMonth); $i++){
+                                            $month = $i;
+                                            $selected = "";
+                                            if ($viewFilterMonth == $month) {
+                                                $selected = "selected";
+                                            }
+                                            ?>
+                                            <option value="<?php echo $month ?>" <?php echo $selected ?>><?php echo $arrayMonth[$month] ?></option>
+                                            <?php
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group mx-sm-3">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <label for="filter-year" class="input-group-text">Tahun</label>
+                                </div>
+                                <div class="input-group-append">
+                                    <select class="form-control select2bs4" id="filter-year" name="filter-year">
+                                        <?php
+                                        for ($i = 0; $i <= 10; $i++){
+                                            $year = date('Y') - $i;
+                                            $selected = "";
+                                            if ($viewFilterYear == $year) {
+                                                $selected = "selected";
+                                            }
+                                            ?>
+                                            <option value="<?php echo $year ?>" <?php echo $selected ?>><?php echo "$year" ?></option>
+                                            <?php
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group mx-sm-3">
+                            <div class="input-group">
+                                <button type="submit" name="action" class="btn btn-warning" value="filter">
+                                    <i class="fas fa-filter"></i>&nbsp; Tampilkan
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php if ($viewSuccess) { ?>
+        <div class="col-md-12">
+            <div class="alert alert-success alert-dismissible bg-success text-white border-0 fade show" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <?php echo $viewSuccess ?>
+            </div>
+        </div>
+    <?php } ?>
+    <?php if ($viewAlert) { ?>
+        <div class="col-md-12">
+            <div class="alert alert-danger alert-dismissible bg-danger text-white border-0 fade show" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <?php echo $viewAlert ?>
+            </div>
+        </div>
+    <?php } ?>
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered display no-wrap datatable" style="width:100%">
+                                <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th width="50"></th>
+                                    <?php
+                                    if ($allInput) {
+                                        foreach ($allInput as $item) {
+                                            $input = $helper->getArrayValue($item, 'input');
+                                            if ($input) {
+                                                $inputTitle = $helper->getArrayValue($input, 'title');
+                                                $inputSlug = $helper->getArrayValue($input, 'slug');
+                                                $inputType = $helper->getArrayValue($input, 'type');
+                                                $inputSource = $helper->getArrayValue($input, 'source');
+
+                                                if ($inputTitle) {
+                                                    ?>
+                                                    <th><?php echo $inputTitle ?></th>
+                                                    <?php
+                                                }
+                                            }
+                                        }
+                                    }
+                                    ?>
+                                </tr>
+                                </thead>
+                                <?php
+                                if ($viewData) {
+                                    $data = $helper->getArrayValue($viewData, "data");
+                                    $total = $helper->getArrayValue($viewData, "total");
+                                    if ($data){
+                                        ?>
+                                        <tbody>
+                                        <?php
+                                        $no = 0;
+                                        $clsUser = new User();
+                                        $clsMetaData = new MetaData();
+                                        foreach ($data as $item) {
+                                            $no++;
+                                            $id = $helper->getArrayValue($item, "id");
+                                            $id = $helper->getArrayValue($item, "id");
+                                            $code = $helper->getArrayValue($item, "code");
+                                            $createdate = $helper->getArrayValue($item, "createdate");
+                                            $createby = $helper->getArrayValue($item, "createby");
+                                            $createbyname = $helper->getArrayValue($item, "createbyname");
+                                            $dateunrev = $helper->unreverseDateTime($createdate);
+
+                                            $item["DT_RowId"] = $id;
+                                            $item["no"] = $no;
+
+                                            ?>
+                                            <tr data-key="id" data-value="<?php echo $id; ?>">
+                                                <td width="20" data-key="no" data-text="no" align="right" data-value="<?php echo $no; ?>"><?php echo $item["no"] ?></td>
+
+                                                <td width="50" data-key="" data-edit="false" data-input="action">
+                                                        <textarea style="display: none" class="item-data" data-id="<?php echo $id ?>">
+                                                            <?php echo json_encode($item, true) ?>
+                                                        </textarea>
+                                                    <a title="Edit" href="<?php echo $baseUrl . "$controllerPath/$viewId/edit/$id" ?>" class="btn btn-sm btn-warning">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button data-id="<?php echo $id ?>" class="btn btn-sm btn-danger btn-item-delete">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+
+                                                <?php
+                                                if ($allInput) {
+                                                    $detailKeys = $helper->getArrayValue($item, "detail-keys");
+                                                    $detailValues = $helper->getArrayValue($item, "detail-values");
+
+                                                    $arrDetailKeys = null;
+                                                    $arrDetailValues = null;
+
+                                                    if ($detailKeys) {
+                                                        $arrDetailKeys = explode("***", $detailKeys);
+                                                        $arrDetailValues = explode("***", $detailValues);
+                                                        for ($k = 0; $k < count($arrDetailKeys); $k++) {
+                                                            $itemDetailKeys = $arrDetailKeys[$k];
+                                                            $itemDetailValues = $arrDetailValues[$k];
+                                                            $item[$itemDetailKeys] = $itemDetailValues;
+                                                        }
+                                                    }
+
+                                                    foreach ($allInput as $itemInput) {
+                                                        $input = $helper->getArrayValue($itemInput, 'input');
+                                                        $parentIds = $helper->getArrayValue($itemInput, 'parent-ids');
+                                                        $parentTypes = $helper->getArrayValue($itemInput, 'parent-types');
+                                                        $parentSources = $helper->getArrayValue($itemInput, 'parent-sources');
+                                                        $parentFormats = $helper->getArrayValue($itemInput, 'parent-formats');
+                                                        $parentSlugs = $helper->getArrayValue($itemInput, 'parent-slugs');
+                                                        $itemValues = array();
+
+                                                        // print_r($item);
+                                                        // print_r($itemInput);
+
+                                                        if ($input) {
+                                                            $inputTitle = $helper->getArrayValue($input, 'title');
+                                                            $inputSlug = $helper->getArrayValue($input, 'slug');
+                                                            $inputType = $helper->getArrayValue($input, 'type');
+                                                            $inputSource = $helper->getArrayValue($input, 'source');
+                                                            $inputFormat = $helper->getArrayValue($input, 'format');
+                                                            $itemValue = $helper->getArrayValue($item, $inputSlug);
+
+                                                            preg_match_all("^\[(.*?)]^", $itemValue, $matches);
+                                                            if (count($matches) > 1){
+                                                                if ($matches[1]) {
+                                                                    if (count($matches[1]) > 0){
+                                                                        $selectedVal = $matches[1][0];
+                                                                        if ($selectedVal) {
+                                                                            $selectedIds = explode(',', $selectedVal);
+                                                                            $selectedIdVals = array();
+                                                                            if ($selectedIds) {
+                                                                                foreach ($selectedIds as $selectedId) {
+                                                                                    $arrSelectedId = explode(':', $selectedId);
+                                                                                    if ($arrSelectedId) {
+                                                                                        $selectedIdKey = $arrSelectedId[0];
+                                                                                        $selectedIdVal = $arrSelectedId[1];
+                                                                                        $arrSelectedIdVal = explode('#', $selectedIdVal);
+                                                                                        if (count($arrSelectedIdVal) == 2) {
+                                                                                            $selectedIdVals[] = $arrSelectedIdVal[1];
+                                                                                        } else {
+                                                                                            $selectedIdVals[] = $selectedIdVal;
+                                                                                        }
+                                                                                        if ($selectedIdKey) {
+                                                                                            $arrSelectedIdKey = explode('#', $selectedIdKey);
+                                                                                            if ($arrSelectedIdKey) {
+                                                                                                $selectedIdKeyType = $arrSelectedIdKey[0];
+                                                                                                if (count($arrSelectedIdKey) > 1) {
+                                                                                                    $selectedIdKeyMeta = $arrSelectedIdKey[1];
+                                                                                                    if ($selectedIdKeyType == "meta") {
+                                                                                                        $valSelectedId = implode(",", $selectedIdVals);
+                                                                                                        $itemValue = $clsMetaData->fetchByIds($valSelectedId, ", ");
+                                                                                                    }
+                                                                                                } else {
+                                                                                                    switch ($selectedIdKeyType) {
+                                                                                                        case "user":
+                                                                                                            $valSelectedId = implode(",", $selectedIdVals);
+                                                                                                            $itemValue = $clsUser->fetchByIds($valSelectedId, ", ");
+                                                                                                            break;
+                                                                                                    }
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                            if ($inputFormat) {
+                                                                $format = $inputFormat;
+                                                                switch ($format) {
+                                                                    case "roman":
+                                                                        $itemValue = $helper->romawi($itemValue);
+                                                                        break;
+                                                                    case "spell":
+                                                                        $itemValue = $helper->terbilang($itemValue);
+                                                                        break;
+                                                                    case "ucase":
+                                                                        $itemValue = strtoupper($itemValue);
+                                                                        break;
+                                                                    case "lcase":
+                                                                        $itemValue = strtolower($itemValue);
+                                                                        break;
+                                                                    case "numeric":
+                                                                        $itemValue = number_format($itemValue, 0, ",", ".");
+                                                                        break;
+                                                                    default:
+                                                                        if (substr($format, 1, 1) == "0") {
+                                                                            $length = strlen($format);
+                                                                            $itemValue = sprintf("%0" . $length . "d", $itemValue);
+                                                                            $itemValue = trim($itemValue);
+                                                                        }
+                                                                        break;
+                                                                }
+                                                            }
+
+                                                            $itemValues[$inputSlug][] = $itemValue;
+
+                                                            if ($parentIds) {
+                                                                $arrParentIds = explode("***", $parentIds);
+                                                                $arrParentSlugs = explode("***", $parentSlugs);
+                                                                $arrParentFormats = explode("***", $parentFormats);
+                                                                if ($arrParentIds) {
+                                                                    for ($k = 0; $k < count($arrParentIds); $k++) {
+                                                                        $itemValue = $item[$arrParentSlugs[$k]];
+                                                                        $format = $arrParentFormats[$k];
+                                                                        if ($format) {
+                                                                            switch ($format) {
+                                                                                case "roman":
+                                                                                    $itemValue = $helper->romawi($itemValue);
+                                                                                    break;
+                                                                                case "spell":
+                                                                                    $itemValue = $helper->terbilang($itemValue);
+                                                                                    break;
+                                                                                case "ucase":
+                                                                                    $itemValue = strtoupper($itemValue);
+                                                                                    break;
+                                                                                case "lcase":
+                                                                                    $itemValue = strtolower($itemValue);
+                                                                                    break;
+                                                                                case "numeric":
+                                                                                    $itemValue = number_format($itemValue, 0, ",", ".");
+                                                                                    break;
+                                                                                default:
+                                                                                    if (substr($format, 1, 1) == "0") {
+                                                                                        $length = strlen($format);
+                                                                                        $itemValue = sprintf("%0" . $length . "d", $itemValue);
+                                                                                        $itemValue = trim($itemValue);
+                                                                                    }
+                                                                                    break;
+                                                                            }
+                                                                        }
+                                                                        $itemValues[$inputSlug][] = $itemValue;
+                                                                    }
+                                                                }
+                                                            }
+
+                                                            if ($inputTitle) {
+                                                                if (count($itemValues[$inputSlug]) > 1) {
+                                                                    $itemValue = implode("/", $itemValues[$inputSlug]);
+                                                                } else {
+                                                                    $itemValue = $itemValues[$inputSlug][0];
+                                                                }
+                                                                ?>
+                                                                <td><?php echo $itemValue ?></td>
+                                                                <?php
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                ?>
+                                            </tr>
+                                            <?php
+                                        }
+                                        ?>
+                                        </tbody>
+                                        <?php
+                                    }
+                                }
+                                ?>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a target="_blank" href="<?php echo $printURL ?>" class="btn btn-dark float-right">
+                    <i class="fas fa-print"></i>
+                    Cetak
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

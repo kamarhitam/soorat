@@ -8,12 +8,16 @@ $config = Registry::get('config');
 $controllerPath = Registry::get('controllerPath');
 $controllerName = Registry::get('controllerName');
 $viewData = isset($this->viewData) ? $this->viewData : array();
+$viewDataMeta = isset($this->viewDataMeta) ? $this->viewDataMeta : array();
 
 $viewAction = isset($this->viewAction) ? $this->viewAction : "";
 
 $viewAlert = isset($this->viewAlert) ? $this->viewAlert : "";
 $viewSuccess = isset($this->viewSuccess) ? $this->viewSuccess : "";
 
+if ($viewDataMeta) {
+    $dataMeta = $helper->getArrayValue($viewDataMeta, 'data');
+}
 ?>
 <div class="row">
     <div class="col-md-12">
@@ -61,6 +65,16 @@ $viewSuccess = isset($this->viewSuccess) ? $this->viewSuccess : "";
                                     <th>Email</th>
                                     <th>Jenis</th>
                                     <th>Status</th>
+                                    <?php
+                                    if ($dataMeta) {
+                                        foreach ($dataMeta as $itemMeta) {
+                                            $colName = $itemMeta["name"];
+                                            ?>
+                                            <th><?php echo $colName ?> </th>
+                                            <?php
+                                        }
+                                    }
+                                    ?>
                                 </tr>
                                 </thead>
                                 <?php
@@ -89,6 +103,24 @@ $viewSuccess = isset($this->viewSuccess) ? $this->viewSuccess : "";
                                             if (file_exists($fileImage)){
                                                 if (is_file($fileImage)){
                                                     $imageSrc = $baseUrl . "image/profile/" . strtolower($code) . "/$image";
+                                                }
+                                            }
+
+                                            if ($dataMeta) {
+                                                $detailKeys = $helper->getArrayValue($item, "detail-keys");
+                                                $detailValues = $helper->getArrayValue($item, "detail-values");
+
+                                                $arrDetailKeys = null;
+                                                $arrDetailValues = null;
+
+                                                if ($detailKeys) {
+                                                    $arrDetailKeys = explode("***", $detailKeys);
+                                                    $arrDetailValues = explode("***", $detailValues);
+                                                    for ($k = 0; $k < count($arrDetailKeys); $k++) {
+                                                        $itemDetailKeys = $arrDetailKeys[$k];
+                                                        $itemDetailValues = $arrDetailValues[$k];
+                                                        $item[$itemDetailKeys] = $itemDetailValues;
+                                                    }
                                                 }
                                             }
 
@@ -124,6 +156,16 @@ $viewSuccess = isset($this->viewSuccess) ? $this->viewSuccess : "";
                                                 <td data-key="email"><?php echo $item["email"] ?></td>
                                                 <td data-key="type"><?php echo $item["type-name"] ?></td>
                                                 <td data-key="active"><?php echo $statusName ?></td>
+                                                <?php if ($dataMeta) {
+                                                    foreach ($dataMeta as $itemMeta) {
+                                                        $colSlug = $itemMeta["slug"];
+                                                        ?>
+                                                        <td data-key="<?php echo $colSlug ?>"><?php echo $item[$colSlug] ?></td>
+                                                        <?php
+                                                    }
+                                                    ?>
+
+                                                <?php } ?>
                                             </tr>
                                             <?php
                                         }
